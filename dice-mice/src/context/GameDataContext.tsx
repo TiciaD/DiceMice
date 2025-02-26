@@ -1,0 +1,70 @@
+import { County } from "@/models/county.model";
+import { Skill } from "@/models/skill.model";
+import { Stat } from "@/models/stat.model";
+import { db } from "@/utils/firebase";
+import { collection, getDocs } from "firebase/firestore";
+import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+
+// Define context state
+interface GameDataContextType {
+  counties: County[];
+  stats: Stat[];
+  skills: Skill[];
+  loading: boolean;
+}
+
+// Create context
+const GameDataContext = createContext<GameDataContextType | undefined>(undefined);
+
+// Provider component
+export const GameDataProvider = ({ children }: { children: ReactNode }) => {
+  const [counties, setCounties] = useState<County[]>([]);
+  const [stats, setStats] = useState<Stat[]>([]);
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchGameData = async () => {
+      try {
+        setLoading(true);
+
+        // Fetch counties
+        const countiesSnapshot = await getDocs(collection(db, 'counties'));
+        const fetchedCounties = countiesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as County[];
+
+        // Fetch stats
+        const statsSnapshot = await getDocs(collection(db, 'stats'));
+        const fetchedStats = statsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Stat[];
+
+        // Fetch skills
+        const skillsSnapshot = await getDocs(collection(db, 'skills'));
+        const fetchedSkills = skillsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Skill[];
+
+        setCounties(fetchedCounties);
+        setStats(fetchedStats);
+        setSkills(fetchedSkills);
+      } catch (error) {
+        console.error('Error fetching game data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGameData();
+  }, []);
+
+  return (
+    <GameDataContext.Provider value={{ counties, stats, skills, loading }}>
+      {children}
+    </GameDataContext.Provider>
+  );
+};
+
+// Hook to use the context
+export const useGameData = () => {
+  const context = useContext(GameDataContext);
+  if (!context) {
+    throw new Error('useGameData must be used within a GameDataProvider');
+  }
+  return context;
+};
