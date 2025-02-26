@@ -9,7 +9,6 @@ import {
   DialogContentText,
   DialogActions,
   TextField,
-  FormHelperText,
 } from "@mui/material";
 
 interface CreatePlayerDialogProps {

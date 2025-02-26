@@ -1,9 +1,9 @@
 import { PlayerHouse } from '@/models/player-house.model'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import HouseInfo from './HouseInfo'
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material'
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material'
 import { useGameData } from '@/context/GameDataContext'
-import { addDoc, collection, doc } from 'firebase/firestore'
+import { addDoc, collection, doc, getDoc } from 'firebase/firestore'
 import { db } from '@/utils/firebase'
 
 interface HouseProps {
@@ -26,6 +26,27 @@ const House = (props: HouseProps) => {
     name: false,
     countyId: false,
   });
+
+  useEffect(() => {
+    if (!props.house) {
+      const fetchHouse = async () => {
+        try {
+          const houseRef = doc(db, "houses", props.playerId);
+          const houseSnap = await getDoc(houseRef);
+
+          if (houseSnap.exists()) {
+            setCurrentHouse({ id: houseSnap.id, ...houseSnap.data() } as PlayerHouse);
+          } else {
+            setCurrentHouse(null);
+          }
+        } catch (error) {
+          console.error("Error fetching house:", error);
+        }
+      };
+
+      fetchHouse();
+    }
+  }, [props.house, props.playerId]);
 
   const handleOpen = () => setOpenCreateHouseDialog(true);
   const handleClose = () => {
@@ -100,7 +121,7 @@ const House = (props: HouseProps) => {
       {currentHouse != null ?
         <div>
           <h3>House {currentHouse.name}</h3>
-          <HouseInfo />
+          <HouseInfo house={currentHouse} setHouse={setCurrentHouse} />
         </div> :
         <div>
           <p>No House Found for selected player</p>

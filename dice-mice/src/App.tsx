@@ -4,7 +4,7 @@ import { SelectOption } from './models/select.model';
 import { getAllPlayers, getHouseByPlayerId } from './services/firestore-service';
 import House from './features/house/House';
 import { PlayerHouse } from './models/player-house.model';
-import { Box, Button, CircularProgress, Divider, FormControl, InputLabel, MenuItem, Select } from '@mui/material';
+import { Box, Button, CircularProgress, Divider, FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material';
 import CreatePlayerDialog from './features/create-player/CreatePlayerDialog';
 
 function App() {
@@ -60,7 +60,7 @@ function App() {
         </FormControl>
       </Box>
 
-      <p id="hint">Don't see your name? Click below to create a new player.</p>
+      <Typography variant="subtitle2" gutterBottom>Don't see your name? Click below to create a new player.</Typography>
       <Button variant="contained" onClick={() => setOpenDialog(true)}>Create Player</Button>
       <CreatePlayerDialog
         open={openDialog}
