@@ -27,6 +27,7 @@ const HouseInfo = ({ house, setHouse }: HouseInfoProps) => {
   };
 
   const handleSave = async () => {
+    console.log("submitted form data", formData)
     setSubmitting(true);
     try {
       const houseRef = doc(db, "houses", house.id);
@@ -50,6 +51,7 @@ const HouseInfo = ({ house, setHouse }: HouseInfoProps) => {
   };
 
   const getCountyName = () => {
+    console.log("house info", house)
     if (!loading) {
       return counties.find((county) => county.id == house.countyId)?.name || 'Unknown County'
     } else {

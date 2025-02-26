@@ -1,7 +1,7 @@
 import { PlayerHouse } from '@/models/player-house.model'
 import { useEffect, useState } from 'react'
 import HouseInfo from './HouseInfo'
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material'
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material'
 import { useGameData } from '@/context/GameDataContext'
 import { addDoc, collection, doc, getDoc } from 'firebase/firestore'
 import { db } from '@/utils/firebase'
@@ -120,11 +120,11 @@ const House = (props: HouseProps) => {
     <>
       {currentHouse != null ?
         <div>
-          <h3>House {currentHouse.name}</h3>
+          <Typography variant="h5" gutterBottom>House {currentHouse.name}</Typography>
           <HouseInfo house={currentHouse} setHouse={setCurrentHouse} />
         </div> :
         <div>
-          <p>No House Found for selected player</p>
+          <Typography variant="subtitle1" gutterBottom>No House Found for selected player</Typography>
           <Button variant="contained" onClick={handleOpen}>
             Create House
           </Button>

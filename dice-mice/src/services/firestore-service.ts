@@ -48,7 +48,10 @@ export async function getHouseByPlayerId(
     }
 
     // Assuming each player has only one house, return the first one
-    return querySnapshot.docs[0].data() as PlayerHouse;
+    return {
+      id: querySnapshot.docs[0].id,
+      ...querySnapshot.docs[0].data(),
+    } as PlayerHouse;
   } catch (error) {
     console.error('Error fetching house:', error);
     return null;
