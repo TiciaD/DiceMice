@@ -62,6 +62,14 @@ const HouseInfo = ({ house, setHouse }: HouseInfoProps) => {
   return (
     <Card variant="outlined">
       <CardContent>
+        {/* Read-Only Fields */}
+        <Typography variant="h6">
+          Origin County
+        </Typography>
+        <Typography variant="subtitle1" gutterBottom>
+          {getCountyName()}
+        </Typography>
+
         <TextField
           margin="dense"
           name="name"
@@ -104,15 +112,6 @@ const HouseInfo = ({ house, setHouse }: HouseInfoProps) => {
           value={formData.gold}
           onChange={handleInputChange}
         />
-
-        {/* Read-Only Fields */}
-        <Typography variant="h6" gutterBottom>
-          Origin County
-        </Typography>
-        <Typography variant="subtitle1" gutterBottom>
-          {getCountyName()}
-        </Typography>
-
       </CardContent>
 
       <CardActions>

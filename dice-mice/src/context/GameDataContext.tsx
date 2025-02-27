@@ -1,3 +1,4 @@
+import { Class } from "@/models/class.model";
 import { County } from "@/models/county.model";
 import { Skill } from "@/models/skill.model";
 import { Stat } from "@/models/stat.model";
@@ -10,6 +11,7 @@ interface GameDataContextType {
   counties: County[];
   stats: Stat[];
   skills: Skill[];
+  classes: Class[]
   loading: boolean;
 }
 
@@ -19,6 +21,7 @@ const GameDataContext = createContext<GameDataContextType | undefined>(undefined
 // Provider component
 export const GameDataProvider = ({ children }: { children: ReactNode }) => {
   const [counties, setCounties] = useState<County[]>([]);
+  const [classes, setClasses] = useState<Class[]>([]);
   const [stats, setStats] = useState<Stat[]>([]);
   const [skills, setSkills] = useState<Skill[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,6 +35,10 @@ export const GameDataProvider = ({ children }: { children: ReactNode }) => {
         const countiesSnapshot = await getDocs(collection(db, 'counties'));
         const fetchedCounties = countiesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as County[];
 
+        // Fetch classes
+        const classesSnapshot = await getDocs(collection(db, 'classes'));
+        const fetchedClasses = classesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Class[];
+
         // Fetch stats
         const statsSnapshot = await getDocs(collection(db, 'stats'));
         const fetchedStats = statsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Stat[];
@@ -41,6 +48,7 @@ export const GameDataProvider = ({ children }: { children: ReactNode }) => {
         const fetchedSkills = skillsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Skill[];
 
         setCounties(fetchedCounties);
+        setClasses(fetchedClasses)
         setStats(fetchedStats);
         setSkills(fetchedSkills);
       } catch (error) {
@@ -54,7 +62,7 @@ export const GameDataProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <GameDataContext.Provider value={{ counties, stats, skills, loading }}>
+    <GameDataContext.Provider value={{ classes, counties, stats, skills, loading }}>
       {children}
     </GameDataContext.Provider>
   );

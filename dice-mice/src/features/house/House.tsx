@@ -1,7 +1,7 @@
 import { PlayerHouse } from '@/models/player-house.model'
 import { useEffect, useState } from 'react'
 import HouseInfo from './HouseInfo'
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material'
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material'
 import { useGameData } from '@/context/GameDataContext'
 import { addDoc, collection, doc, getDoc } from 'firebase/firestore'
 import { db } from '@/utils/firebase'
@@ -117,7 +117,7 @@ const House = (props: HouseProps) => {
   };
 
   return (
-    <>
+    <Box sx={{ mt: 2, mb: 2 }}>
       {currentHouse != null ?
         <div>
           <Typography variant="h5" gutterBottom>House {currentHouse.name}</Typography>
@@ -211,7 +211,7 @@ const House = (props: HouseProps) => {
           </Dialog>
         </div>
       }
-    </>
+    </Box>
   )
 }
 

@@ -1,3 +1,4 @@
+import { Character } from '@/models/character.model';
 import { PlayerHouse } from '@/models/player-house.model';
 import { SelectOption } from '@/models/select.model';
 import { db } from '@/utils/firebase';
@@ -54,6 +55,46 @@ export async function getHouseByPlayerId(
     } as PlayerHouse;
   } catch (error) {
     console.error('Error fetching house:', error);
+    return null;
+  }
+}
+
+export async function getCharactersByHouseId(
+  houseId: string
+): Promise<Character[] | null> {
+  console.log(`Fetching Characters for house ID: ${houseId}`);
+
+  try {
+    // Create a document reference for the house
+    const houseDocRef = doc(db, 'houses', houseId);
+
+    // Query the houses collection where the houseId field matches the document reference
+    const q = query(
+      collection(db, 'characters'),
+      where('houseId', '==', houseDocRef)
+    );
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      console.log('no characters found for the house');
+      return null; // No characters found for the house
+    }
+
+    const characterArr: Character[] = [];
+    console.log('characters found query snapshot data', querySnapshot.docs);
+    querySnapshot.forEach((doc) => {
+      const docData = doc.data();
+      const character = {
+        id: doc.id,
+        ...docData,
+      } as Character;
+
+      characterArr.push(character);
+    });
+
+    return characterArr;
+  } catch (error) {
+    console.error('Error fetching characters:', error);
     return null;
   }
 }

@@ -3,11 +3,14 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { GameDataProvider } from './context/GameDataContext.tsx'
+import { BrowserRouter } from 'react-router-dom'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <GameDataProvider>
-      <App />
-    </GameDataProvider>
+    <BrowserRouter>
+      <GameDataProvider>
+        <App />
+      </GameDataProvider>
+    </BrowserRouter>
   </StrictMode>,
 )
