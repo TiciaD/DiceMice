@@ -2,7 +2,14 @@ import { Character } from '@/models/character.model';
 import { PlayerHouse } from '@/models/player-house.model';
 import { SelectOption } from '@/models/select.model';
 import { db } from '@/utils/firebase';
-import { collection, doc, getDocs, query, where } from 'firebase/firestore';
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+} from 'firebase/firestore';
 
 export async function getAllPlayers() {
   console.log('Loading Players');
@@ -98,3 +105,20 @@ export async function getCharactersByHouseId(
     return null;
   }
 }
+
+export const fetchInitiativeChart = async () => {
+  try {
+    const docRef = doc(db, 'game_config', 'initiative_chart');
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      return docSnap.data().initiativeDice; // ✅ Returns initiativeDice array
+    } else {
+      console.error('Initiative chart not found!');
+      return [];
+    }
+  } catch (error) {
+    console.error('Error fetching initiative chart:', error);
+    return [];
+  }
+};

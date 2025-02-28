@@ -5,22 +5,18 @@ export interface Class {
   description: string;
   abilityIds: string[];
   skillIds: string[];
-  base_values: ClassLevels;
+  baseValues: ClassLevels;
+  prerequisites: Prerequisite[];
+  willpower_advancement: 'even_levels' | 'each_level' | 'none';
+  hit_die: string;
 }
 
-export interface ClassLevels {
-  1: ClassStats;
-  2: ClassStats;
+interface Prerequisite {
+  min: number;
+  stat: string;
 }
 
-export interface ClassStats {
-  ac: number;
-  attack: number;
-  damage_bonus: string;
-  fortitude: number;
-  leadership: number;
-  reflex: number;
-  skill_ranks: number;
-  spell: number;
-  will: number;
+interface ClassLevels {
+  1: Record<string, number>;
+  2?: Record<string, number>;
 }

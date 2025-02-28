@@ -1,60 +1,110 @@
 import { useEffect, useState } from "react";
-import { Alert, Button, CircularProgress, Container, FormControl, InputLabel, MenuItem, MobileStepper, Select, Step, StepLabel, Stepper, Typography, useMediaQuery, useTheme } from "@mui/material";
-import PlayerSelection from "@/features/character-create/PlayerSelection";
-import CountySelection from "@/features/character-create/CountySelection";
+import { Alert, Box, CircularProgress, Container, FormControl, FormHelperText, InputLabel, MenuItem, Select, Typography } from "@mui/material";
+import Grid from '@mui/material/Grid2';
 import StatGeneration from "@/features/character-create/StatGeneration";
+import { useGameData } from "@/context/GameDataContext";
+import { collection, getDocs } from "firebase/firestore";
+import { User } from "@/models/user.model";
+import { db } from "@/utils/firebase";
+import ClassBasedStats from "@/features/character-create/ClassBasedStats";
 
 const CharacterCreate = () => {
+  const { counties } = useGameData();
   const [loading, setLoading] = useState(false);
+  const [players, setPlayers] = useState<User[]>([]);
+
+
   const [selectedPlayer, setSelectedPlayer] = useState('');
   const [selectedCounty, setSelectedCounty] = useState('');
-  const [generatedStats, setGeneratedStats] = useState<number[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [selectedClass, setSelectedClass] = useState('');
+  const [generatedStats, setGeneratedStats] = useState<Record<string, number>>({});
+  const [submitted, setSubmitted] = useState(false)
+
+  useEffect(() => {
+    setLoading(true);
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    // Fetch Players
+    const playerSnapshot = await getDocs(collection(db, "players"));
+    const fetchedPlayers = playerSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User));
+
+    setPlayers(fetchedPlayers);
+    setLoading(false);
+  }
+
+  const handleSubmit = (stats: Record<string, number>) => {
+    console.log("submitted")
+    console.log('selected class', selectedClass)
+    setGeneratedStats(stats)
+    console.log("is all stats filled", isAllStatsFilled)
+    if (isAllStatsFilled) {
+      setSubmitted(true)
+    }
+  }
+
+  const isAllStatsFilled = Object.keys(generatedStats).every(stat => generatedStats[stat] > 0)
 
   return (
-    <Container>
+    <Container sx={{ pt: 2 }}>
       <Typography variant="h4" gutterBottom>Create Your Mouse</Typography>
-      <form onSubmit={handleSubmit}>
+      {!loading && <Box>
 
         {/* Select Player */}
-        <FormControl fullWidth margin="normal">
+        <FormControl fullWidth margin="normal" size="small">
           <InputLabel>Select Player</InputLabel>
-          <Select onChange={handleSelectPlayer} value={selectedPlayerId} label="Select Player" name="playerId" required>
+          <Select onChange={(e) => setSelectedPlayer(e.target.value)} value={selectedPlayer} label="Select Player" name="playerId" required>
             {players.map(player => (
               <MenuItem key={player.id} value={player.id}>{player.username}</MenuItem>
             ))}
           </Select>
+          {!selectedPlayer && <FormHelperText>Please select player before entering stats.</FormHelperText>}
         </FormControl>
 
         {/* Select County */}
-        <Select
-          required
-          labelId="county-select-label"
-          id="countyId"
-          name="countyId"
-          label="County"
-          value={houseFormData.countyId}
-          onChange={handleInputChange}
-        >
-          {loading ? (
-            <MenuItem disabled>Loading...</MenuItem>
-          ) : (
-            counties.map(county => (
-              <MenuItem key={county.id} value={county.id}>
-                {county.name}
-              </MenuItem>
-            ))
-          )}
-        </Select>
-      </form>
+        <FormControl fullWidth margin="normal" size="small">
+          <InputLabel>County</InputLabel>
+          <Select
+            required
+            labelId="county-select-label"
+            id="countyId"
+            name="countyId"
+            label="County"
+            value={selectedCounty}
+            onChange={(e) => setSelectedCounty(e.target.value)}
+          >
+            {loading ? (
+              <MenuItem disabled>Loading...</MenuItem>
+            ) : (
+              counties.map(county => (
+                <MenuItem key={county.id} value={county.id}>
+                  {county.name}
+                </MenuItem>
+              ))
+            )}
+          </Select>
+          {!selectedCounty && <FormHelperText>Please select county before entering stats.</FormHelperText>}
+        </FormControl>
+        <Alert severity="warning" >Changing County will reset all stats.</Alert>
+      </Box>
 
-
-      {
-        loading && <CircularProgress />
       }
-      {/* Warning if County Changes */}
 
-      {/* Stat Generation */}
+
+      {loading && <CircularProgress />}
+
+      {/* Flex Row when above md breakpoint, flex column when below md breakpoint */}
+      <Box sx={{ width: '100%', display: 'flex', flexDirection: { xs: "column", md: "row" } }}>
+        <Grid container spacing={2} sx={{ width: '100%' }}>
+          <Grid size={{ xs: 12, md: 3 }}>
+            <StatGeneration countyId={selectedCounty} onStatsGenerated={handleSubmit} />
+          </Grid>
+          <Grid size={{ xs: 12, md: 'grow' }}>
+            {submitted && <ClassBasedStats generatedStats={generatedStats} onClassSelect={setSelectedClass} />}
+          </Grid>
+        </Grid>
+      </Box>
 
       {/* Finalize Button */}
       {/* {generatedStats && (

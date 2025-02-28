@@ -46,7 +46,7 @@ export const GameDataProvider = ({ children }: { children: ReactNode }) => {
         // Fetch skills
         const skillsSnapshot = await getDocs(collection(db, 'skills'));
         const fetchedSkills = skillsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Skill[];
-
+        console.log("fetched stats", fetchedStats)
         setCounties(fetchedCounties);
         setClasses(fetchedClasses)
         setStats(fetchedStats);
