@@ -89,7 +89,7 @@ const Home = () => {
       {currentPlayer.length > 0 && !loading &&
         (
           <>
-            <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)} centered>
+            <Tabs value={activeTab} onChange={(_e, newValue) => setActiveTab(newValue)} centered>
               <Tab label="House" />
               <Tab label="Characters" />
             </Tabs>

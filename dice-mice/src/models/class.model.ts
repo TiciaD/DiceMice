@@ -3,7 +3,7 @@ export interface Class {
   name: string;
   isAvailable: boolean;
   description: string;
-  abilityIds: string[];
+  abilities: Ability[];
   skillIds: string[];
   baseValues: ClassLevels;
   prerequisites: Prerequisite[];
@@ -19,4 +19,10 @@ interface Prerequisite {
 interface ClassLevels {
   1: Record<string, number>;
   2?: Record<string, number>;
+}
+
+interface Ability {
+  name: string;
+  level: number;
+  description: string;
 }

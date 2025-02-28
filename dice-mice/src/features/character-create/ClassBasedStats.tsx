@@ -29,6 +29,7 @@ const ClassBasedStats = ({ generatedStats, onClassSelect }: ClassBasedStatsProps
   const [skillLevels, setSkillLevels] = useState<SkillLevel[]>([]);
   const [rolledHP, setRolledHP] = useState<number | null>(null);
 
+
   useEffect(() => {
     console.log("skill levels", skillLevels)
   }, [skillLevels]);
