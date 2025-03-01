@@ -11,6 +11,7 @@ export interface Character {
   current_base_stats: CharacterBaseStats;
   original_base_stats: CharacterBaseStats;
   hp_progression: CharacterHitPointProgression;
+  skills: CharacterSkills[];
 }
 
 interface CharacterBaseStats {
@@ -26,4 +27,9 @@ interface CharacterHitPointProgression {
   1?: number;
   2?: number;
   3?: number;
+}
+
+export interface CharacterSkills {
+  skillId: string;
+  skillLevelId: string;
 }

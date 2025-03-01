@@ -1,6 +1,6 @@
 import { AppBar, Toolbar, Typography, Button, Box, IconButton, Menu, MenuItem } from "@mui/material";
 import MenuIcon from '@mui/icons-material/Menu';
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { MouseEvent, useState } from "react";
 import { NavigationLinks } from "@/utils/navigation-links";
 
@@ -77,7 +77,9 @@ const Navbar = () => {
           >
             {navLinks.map((navLink) => (
               <MenuItem key={navLink.path} onClick={handleCloseNavMenu}>
-                <Typography sx={{ textAlign: 'center' }}>{navLink.label}</Typography>
+                <Link to={navLink.path}>
+                  <Typography sx={{ textAlign: 'center' }}>{navLink.label}</Typography>
+                </Link>
               </MenuItem>
             ))}
           </Menu>
@@ -107,7 +109,9 @@ const Navbar = () => {
               onClick={handleCloseNavMenu}
               sx={{ my: 2, color: 'white', display: 'block' }}
             >
-              {navLink.label}
+              <Link to={navLink.path}>
+                {navLink.label}
+              </Link>
             </Button>
           ))}
         </Box>

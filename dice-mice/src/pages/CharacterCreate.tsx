@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Alert, Box, CircularProgress, Container, FormControl, FormHelperText, InputLabel, MenuItem, Select, Typography } from "@mui/material";
+import { Alert, Box, Button, CircularProgress, Container, FormControl, FormHelperText, InputLabel, MenuItem, Select, Typography } from "@mui/material";
 import Grid from '@mui/material/Grid2';
 import StatGeneration from "@/features/character-create/StatGeneration";
 import { useGameData } from "@/context/GameDataContext";
@@ -7,6 +7,8 @@ import { collection, getDocs } from "firebase/firestore";
 import { User } from "@/models/user.model";
 import { db } from "@/utils/firebase";
 import ClassBasedStats from "@/features/character-create/ClassBasedStats";
+import AddBoxIcon from '@mui/icons-material/AddBox';
+import SkillsDialog from "@/features/skills/SkillsDialog";
 
 const CharacterCreate = () => {
   const { counties } = useGameData();
@@ -19,6 +21,7 @@ const CharacterCreate = () => {
   const [selectedClass, setSelectedClass] = useState('');
   const [generatedStats, setGeneratedStats] = useState<Record<string, number>>({});
   const [submitted, setSubmitted] = useState(false)
+  const [openSkillsDialog, setOpenSkillsDialog] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -41,6 +44,8 @@ const CharacterCreate = () => {
     console.log("is all stats filled", isAllStatsFilled)
     if (isAllStatsFilled) {
       setSubmitted(true)
+    } else {
+      setSubmitted(false)
     }
   }
 
@@ -106,6 +111,19 @@ const CharacterCreate = () => {
         </Grid>
       </Box>
 
+      {selectedClass && <Box sx={{ width: '100%', display: 'inline-flex', justifyContent: 'center' }}>
+        <Button variant="outlined" startIcon={<AddBoxIcon />} onClick={() => setOpenSkillsDialog(true)}>
+          Add Skills
+        </Button>
+        <SkillsDialog
+          open={openSkillsDialog}
+          onClose={() => setOpenSkillsDialog(false)}
+          classId={selectedClass}
+          characterLevel={1}
+          assignedSkillPoints={[]} // Placeholder, should come from character state
+        // onSkillChange={onSkillChange}
+        />
+      </Box>}
       {/* Finalize Button */}
       {/* {generatedStats && (
       <Button variant="contained" color="primary" sx={{ mt: 2 }}>

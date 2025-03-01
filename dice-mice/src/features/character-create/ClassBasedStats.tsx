@@ -12,6 +12,7 @@ import { fetchInitiativeChart } from "@/services/firestore-service";
 import { InitiativeEntry } from "@/models/initiative-entry.model";
 import { rollDie } from "@/utils/dice-rolls";
 
+
 interface ClassBasedStatsProps {
   generatedStats: Record<string, number>;
   onClassSelect: (classId: string) => void;
@@ -26,13 +27,7 @@ const ClassBasedStats = ({ generatedStats, onClassSelect }: ClassBasedStatsProps
   const [defensiveStats, setDefensiveStats] = useState<DerivedStat[]>([]);
   const [offensiveStats, setOffensiveStats] = useState<DerivedStat[]>([]);
   const [initiativeChart, setInitiativeChart] = useState<InitiativeEntry[]>([]);
-  const [skillLevels, setSkillLevels] = useState<SkillLevel[]>([]);
   const [rolledHP, setRolledHP] = useState<number | null>(null);
-
-
-  useEffect(() => {
-    console.log("skill levels", skillLevels)
-  }, [skillLevels]);
 
   useEffect(() => {
     setLoading(true)
@@ -52,10 +47,6 @@ const ClassBasedStats = ({ generatedStats, onClassSelect }: ClassBasedStatsProps
       console.log("chart", chart)
       setInitiativeChart(chart);
 
-      // Fetch Skill Levels
-      const skillLevelsSnapshot = await getDocs(collection(db, "skill_levels"));
-      const fetchedSkillLevels = skillLevelsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SkillLevel));
-      setSkillLevels(fetchedSkillLevels);
       setLoading(false)
     }
 
@@ -103,7 +94,7 @@ const ClassBasedStats = ({ generatedStats, onClassSelect }: ClassBasedStatsProps
       derivedStat.variables.forEach((variable) => {
         const levelOneClassStatValues = currentClass.baseValues[1]
         if (variable == 'base') {
-          variables["base"] = levelOneClassStatValues[derivedStat.id] || 0
+          variables["base"] = Number(levelOneClassStatValues[derivedStat.id]) || 0
         } else {
           console.log("does this match abbrieviation", variable.replace("_mod", "").toUpperCase())
           const matchingStat = stats.find((stat) => {
@@ -123,17 +114,22 @@ const ClassBasedStats = ({ generatedStats, onClassSelect }: ClassBasedStatsProps
 
   const getHitDie = () => {
     const classData = classes.find((c) => c.id == selectedClass)
-    return classData?.hit_die || "1d6"; // Default to 1d6 if class is not selected
+    return classData?.hit_die || "__"; // Default to 1d6 if class is not selected
   };
 
   const handleRollHP = () => {
     if (!selectedClass) return;
 
     const hitDie = getHitDie();
-    const rolledValue = rollDie(hitDie);
-    const conMod = Math.max(0, calculateModifier(generatedStats["constitution"])); // Only add positive CON mod?
+    const conMod = Math.max(0, calculateModifier(generatedStats["constitution"]));
 
-    setRolledHP(rolledValue + conMod);
+    let rolledValue;
+
+    do {
+      rolledValue = rollDie(hitDie);
+    } while (rolledValue <= conMod); // Reroll if ≤ CON mod
+
+    setRolledHP(rolledValue);
   };
 
   const getInitiative = () => {
@@ -141,7 +137,7 @@ const ClassBasedStats = ({ generatedStats, onClassSelect }: ClassBasedStatsProps
       const dexModifier = calculateModifier(generatedStats["dexterity"])
       const entry = initiativeChart.find(e => e.modifier === dexModifier);
       if (entry) {
-        return `${entry.diceRolled} ${dexModifier > 0 ? '+' : ''}${dexModifier}`;
+        return `${entry.diceRolled} ${dexModifier > 0 ? '+' : ''}${dexModifier ? dexModifier : ''}`;
       } else {
         return "Unknown"
       }
