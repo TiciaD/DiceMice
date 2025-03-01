@@ -5,7 +5,6 @@ import { evaluate } from "mathjs";
 import { useGameData } from "@/context/GameDataContext";
 import { Class } from "@/models/class.model";
 import { DerivedStat } from "@/models/derived-stat.model";
-import { SkillLevel } from "@/models/skill-level.model";
 import { db } from "@/utils/firebase";
 import { calculateBaseWillpower, calculateModifier, calculateWillpower } from "@/utils/stat-calculations";
 import { fetchInitiativeChart } from "@/services/firestore-service";
