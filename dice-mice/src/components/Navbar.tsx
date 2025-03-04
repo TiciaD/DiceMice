@@ -1,30 +1,31 @@
-import { AppBar, Toolbar, Typography, Button, Box, IconButton, Menu, MenuItem } from "@mui/material";
-import MenuIcon from '@mui/icons-material/Menu';
-import { Link, useNavigate } from "react-router-dom";
 import { MouseEvent, useState } from "react";
-import { NavigationLinks } from "@/utils/navigation-links";
+import { Link, useNavigate } from "react-router-dom";
+import { AppBar, Toolbar, Typography, Button, Box, IconButton, Menu, MenuItem, Avatar, Tooltip } from "@mui/material";
+import { useUser } from "@/context/UserDataProvider";
+import MenuIcon from '@mui/icons-material/Menu';
+import { NavigationLinks, UserMenuNavigationLinks } from "@/utils/navigation-links";
 
 const Navbar = () => {
+  const { user } = useUser();
   const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
-  // const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
+  const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
 
   const navLinks = NavigationLinks
-  // const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
   const handleOpenNavMenu = (event: MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
   };
-  // const handleOpenUserMenu = (event: MouseEvent<HTMLElement>) => {
-  //   setAnchorElUser(event.currentTarget);
-  // };
+  const handleOpenUserMenu = (event: MouseEvent<HTMLElement>) => {
+    setAnchorElUser(event.currentTarget);
+  };
 
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
   };
 
-  // const handleCloseUserMenu = () => {
-  //   setAnchorElUser(null);
-  // };
+  const handleCloseUserMenu = () => {
+    setAnchorElUser(null);
+  };
   const navigate = useNavigate();
 
   return (
@@ -104,16 +105,62 @@ const Navbar = () => {
         </Typography>
         <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
           {navLinks.map((navLink) => (
-            <Button
-              key={navLink.path}
-              onClick={handleCloseNavMenu}
-              sx={{ my: 2, color: 'white', display: 'block' }}
-            >
-              <Link to={navLink.path}>
+            <Link key={navLink.path} to={navLink.path}>
+              <Button
+
+                onClick={handleCloseNavMenu}
+                sx={{ my: 2, color: 'white', display: 'block' }}
+              >
                 {navLink.label}
-              </Link>
-            </Button>
+              </Button>
+            </Link>
           ))}
+        </Box>
+        <Box sx={{ flexGrow: 0 }}>
+          {user ?
+            <Tooltip title={user.username}>
+              <IconButton>
+                <Avatar alt={user.username} src={`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`} />
+              </IconButton>
+            </Tooltip>
+            :
+            <Tooltip title="Login with Discord">
+              <a
+                href={`https://discord.com/oauth2/authorize?client_id=${import.meta.env.VITE_DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(import.meta.env.VITE_DISCORD_REDIRECT_URI)}&response_type=code&scope=identify+email`}
+              >
+                <IconButton onClick={handleOpenUserMenu}>
+                  <img
+                    width="40px"
+                    height="40px"
+                    src="/discord-logo.svg"
+                    alt="Discord Logo"
+                    loading="lazy"
+                  />
+                </IconButton>
+              </a>
+            </Tooltip>}
+          <Menu
+            sx={{ mt: '45px' }}
+            id="menu-appbar"
+            anchorEl={anchorElUser}
+            anchorOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            keepMounted
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            open={Boolean(anchorElUser)}
+            onClose={handleCloseUserMenu}
+          >
+            {UserMenuNavigationLinks.map((userMenuLink) => (
+              <MenuItem key={userMenuLink.path} onClick={handleCloseUserMenu}>
+                <Typography sx={{ textAlign: 'center' }}>{userMenuLink.label}</Typography>
+              </MenuItem>
+            ))}
+          </Menu>
         </Box>
       </Toolbar>
     </AppBar>

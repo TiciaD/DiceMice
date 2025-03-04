@@ -25,3 +25,18 @@ export const NavigationLinks: NavLinks[] = [
     path: '/weapons',
   },
 ];
+
+export const UserMenuNavigationLinks: NavLinks[] = [
+  {
+    label: 'My House',
+    path: '/house',
+  },
+  {
+    label: 'Preferences',
+    path: '/preferences',
+  },
+  {
+    label: 'Logout',
+    path: '/logout',
+  },
+];

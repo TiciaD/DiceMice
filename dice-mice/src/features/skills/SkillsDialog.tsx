@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { Box, Checkbox, CircularProgress, Collapse, Dialog, DialogContent, DialogTitle, FormControlLabel, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
@@ -9,22 +9,24 @@ import { SkillLevel } from "@/models/skill-level.model";
 import { Class } from "@/models/class.model";
 import { Skill } from "@/models/skill.model";
 import { CharacterSkills } from "@/models/character.model";
+import { calculateModifier } from "@/utils/stat-calculations";
 
 interface SkillsDialogProps {
   open: boolean;
   onClose: () => void;
   characterLevel: number;
   classId: string;
-  assignedSkillPoints: CharacterSkills[]; // Skill points already spent per skill
+  characterStats: Record<string, number>;
+  selectedSkills: CharacterSkills[]; // Skill points already spent per skill
+  setSelectedSkills: (skills: CharacterSkills[]) => void
 }
 
-const SkillsDialog = ({ open, onClose, characterLevel, classId, assignedSkillPoints }: SkillsDialogProps) => {
+const SkillsDialog = ({ open, onClose, characterLevel, characterStats, classId, selectedSkills, setSelectedSkills }: SkillsDialogProps) => {
   const { classes, skills } = useGameData();
   const [loading, setLoading] = useState(false);
   const [selectedClass, setSelectedClass] = useState<Class | null>(null)
   const [skillLevels, setSkillLevels] = useState<SkillLevel[]>([]);
   const [expandedSkill, setExpandedSkill] = useState<string | null>(null);
-  const [selectedSkills, setSelectedSkills] = useState<CharacterSkills[]>(assignedSkillPoints);
   const [availableSkillPoints, setAvailableSkillPoints] = useState(0);
 
   useEffect(() => {
@@ -35,7 +37,7 @@ const SkillsDialog = ({ open, onClose, characterLevel, classId, assignedSkillPoi
     console.log("skill ranks for class", skillRanks)
     const usedSkillPoints = calculateUsedSkillPoints();
     setAvailableSkillPoints(Number(skillRanks) - usedSkillPoints)
-  }, [classes, classId, assignedSkillPoints, selectedSkills])
+  }, [classes, classId, selectedSkills])
 
 
   useEffect(() => {
@@ -54,37 +56,60 @@ const SkillsDialog = ({ open, onClose, characterLevel, classId, assignedSkillPoi
   }, [])
 
   const calculateUsedSkillPoints = () => {
-    return assignedSkillPoints.reduce((total, skill) => {
-      const skillLevel = skillLevels.find(level => level.id === skill.skillLevelId);
-      return total + (skillLevel ? skillLevel.cost : 0);
-    }, 0);
+    let usedPointTotal = 0;
+    selectedSkills.forEach((selectedSkill) => {
+      const matchingSkillLevel = skillLevels.find((skillLevel) => skillLevel.id == selectedSkill.skillLevelId)
+      if (matchingSkillLevel) {
+        // Tally up the selectedSkill's level cost
+        const cost = matchingSkillLevel.cost
+        usedPointTotal += cost;
+      }
+    });
+
+    console.log("used skill points", usedPointTotal)
+    return usedPointTotal
   };
 
-  const handleSkillSelection = (skillId: string, selectedLevel: SkillLevel) => {
-    const existingSkill = selectedSkills.find(skill => skill.skillId === skillId);
-    const newCost = selectedLevel.cost;
+  const getTotalPoints = (skill: Skill) => {
+    // See if this skill is in selectedSkills
+    const foundSelectedSkill = selectedSkills.find((selectedSkill) => selectedSkill.skillId == skill.id)
+    if (foundSelectedSkill) {
+      // If it is, then let's find the matching level
+      const matchingSkillLevel = skillLevels.find((skillLevel) => skillLevel.id == foundSelectedSkill.skillLevelId)
 
-    if (!existingSkill) {
-      // First time selecting the skill
-      if (availableSkillPoints < newCost) return;
-      setSelectedSkills([...selectedSkills, { skillId, skillLevelId: selectedLevel.id }]);
-      setAvailableSkillPoints(prev => prev - newCost);
+      if (matchingSkillLevel) {
+        // And calculate the cost by adding the associatedStat modifier to the skill bonus
+        const cost = matchingSkillLevel.bonus + calculateModifier(characterStats[skill.associatedStatId])
+        return cost
+      }
+    }
+
+    return 0;
+  }
+
+  const handleSkillSelection = (e: ChangeEvent<HTMLInputElement>, skillId: string, selectedLevel: SkillLevel) => {
+    console.log("current selected skills", selectedSkills)
+    console.log("current available points", availableSkillPoints)
+    // Check if this skill is already in selectedSkills
+    const existingSelectedSkill = selectedSkills.find((selectedSkill) => selectedSkill.skillId == skillId)
+    if (existingSelectedSkill) {
+      // if so, update the skill level
+      // if checked then set skill level to given skill level
+      if (e.target.checked) {
+        existingSelectedSkill.skillLevelId = selectedLevel.id;
+        setSelectedSkills([...selectedSkills])
+      } else {
+        // if unchecked remove skill from selectedSkills
+        const filteredSkills = selectedSkills.filter((selectedSkill) => selectedSkill.skillId != skillId)
+        setSelectedSkills(filteredSkills)
+      }
     } else {
-      const previousLevel = skillLevels.find(level => level.id === existingSkill.skillLevelId);
-      const previousCost = previousLevel ? previousLevel.cost : 0;
-      const costDifference = newCost - previousCost;
-
-      if (existingSkill.skillLevelId === selectedLevel.id) {
-        // ✅ Unchecking the skill: refund skill points and remove from state
-        setSelectedSkills(prev => prev.filter(skill => skill.skillId !== skillId));
-        setAvailableSkillPoints(prev => prev + previousCost);
-      } else if (newCost > previousCost) {
-        // ✅ Upgrading: charge only the difference
-        if (availableSkillPoints < costDifference) return;
-        setSelectedSkills(prev =>
-          prev.map(skill => (skill.skillId === skillId ? { ...skill, skillLevelId: selectedLevel.id } : skill))
-        );
-        setAvailableSkillPoints(prev => prev - costDifference);
+      // Must be a new skill let's add it to selectedSkills
+      const newSkill: CharacterSkills = { skillId: skillId, skillLevelId: selectedLevel.id }
+      if (e.target.checked) {
+        setSelectedSkills([...selectedSkills, newSkill])
+      } else {
+        console.log("how do you uncheck something that wasn't there?")
       }
     }
   };
@@ -96,7 +121,7 @@ const SkillsDialog = ({ open, onClose, characterLevel, classId, assignedSkillPoi
   const Row = (props: { skill: Skill }) => {
     const { skill } = props;
     const isClassSkill = selectedClass?.skillIds.includes(skill.id) ?? false;
-    console.log("is class skill", isClassSkill)
+
     return (
       <>
         <TableRow>
@@ -108,7 +133,7 @@ const SkillsDialog = ({ open, onClose, characterLevel, classId, assignedSkillPoi
           <TableCell component="th" scope="row" sx={isClassSkill ? { color: 'blue', textDecoration: 'underline' } : null}>
             {skill.name}
           </TableCell>
-          <TableCell align="right">{0}</TableCell>
+          <TableCell align="right">{getTotalPoints(skill)}</TableCell>
         </TableRow>
         <TableRow>
           <TableCell colSpan={3} style={{ padding: 0 }}>
@@ -122,7 +147,7 @@ const SkillsDialog = ({ open, onClose, characterLevel, classId, assignedSkillPoi
                     const existingSkillId = selectedSkills.find(selectedSkill => selectedSkill.skillId === skill.id)?.skillLevelId;
                     const existingSkillCost = skillLevels.find((sl) => sl.id == existingSkillId)?.cost || 0
                     const isDisabled = characterLevel < requiredLevel || availableSkillPoints < (level.cost - existingSkillCost)
-                    const isChecked = selectedSkills.some(selectedSkill => selectedSkill.skillId === skill.id && ((skillLevels.find(l => l.id === selectedSkill.skillLevelId)?.order ?? 0) >= level.order))
+                    const isChecked = !!selectedSkills.find(selectedSkill => selectedSkill.skillId === skill.id && selectedSkill.skillLevelId == level.id)
 
                     return (
                       <Box key={level.id} sx={{ display: "flex", flexDirection: 'column', gap: 1 }}>
@@ -130,7 +155,7 @@ const SkillsDialog = ({ open, onClose, characterLevel, classId, assignedSkillPoi
                           control={
                             <Checkbox name={level.id} checked={isChecked}
                               disabled={isDisabled}
-                              onChange={() => handleSkillSelection(skill.id, level)} />
+                              onChange={(e) => handleSkillSelection(e, skill.id, level)} />
                           }
                           label={level.name}
                         />

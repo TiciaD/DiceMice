@@ -33,17 +33,15 @@ const ClassBasedStats = ({ generatedStats, onClassSelect }: ClassBasedStatsProps
     const fetchData = async () => {
       // Fetch Derived Stats
       const derivedStatsSnapshot = await getDocs(collection(db, "derived_stats"));
-      console.log("derived stats snap", derivedStatsSnapshot)
       const fetchedDerivedStats = derivedStatsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DerivedStat));
-      console.log("fetched derived stats", fetchedDerivedStats)
-      console.log("filter", fetchedDerivedStats.filter(stat => stat.type === "DEFENSE"))
       setDerivedStats(fetchedDerivedStats);
+
       setDefensiveStats(fetchedDerivedStats.filter(stat => stat.type === "DEFENSE"));
       setOffensiveStats(fetchedDerivedStats.filter((stat) => stat.type === "NON-CALCULATED"))
 
       // Fetch initiative chart
       const chart = await fetchInitiativeChart();
-      console.log("chart", chart)
+      // console.log("chart", chart)
       setInitiativeChart(chart);
 
       setLoading(false)
@@ -86,25 +84,43 @@ const ClassBasedStats = ({ generatedStats, onClassSelect }: ClassBasedStatsProps
     const currentClass = classes.find((c) => c.id == selectedClass)
 
     // Prepare variable values
+    let statFormula = derivedStat.formula; // Default formula
+    let statVariables = [...derivedStat.variables]; // Default variables
     const variables: Record<string, number> = {};
+
 
     console.log("derived stats", derivedStats)
     if (currentClass?.baseValues) {
-      derivedStat.variables.forEach((variable) => {
+      // Check if this class has an overriding ability for this stat
+      const applicableOverride = derivedStat.overrides?.find(override =>
+        override.classId === selectedClass &&
+        1 >= override.minLevel && // Ensure character is at or above required level - in this case Level 1
+        currentClass.abilities.some(ability => ability.name === override.abilityName)
+      );
+
+      if (applicableOverride) {
+        // Override formula and variables if present
+        if (applicableOverride.newFormula) statFormula = applicableOverride.newFormula;
+        if (applicableOverride.newVariables) statVariables = applicableOverride.newVariables;
+      }
+
+      console.log("statFormula", statFormula)
+      console.log("stat variables", statVariables)
+      statVariables.forEach((variable) => {
         const levelOneClassStatValues = currentClass.baseValues[1]
         if (variable == 'base') {
           variables["base"] = Number(levelOneClassStatValues[derivedStat.id]) || 0
         } else {
-          console.log("does this match abbrieviation", variable.replace("_mod", "").toUpperCase())
+          // console.log("does this match abbrieviation", variable.replace("_mod", "").toUpperCase())
           const matchingStat = stats.find((stat) => {
             return variable.replace("_mod", "").toUpperCase() == stat.abbreviation
           })
-          console.log("generated stats", generatedStats)
+          // console.log("generated stats", generatedStats)
           variables[variable] = matchingStat ? calculateModifier(generatedStats[matchingStat.id]) : 0
         }
       })
 
-      return evaluateFormula(derivedStat.formula, variables)
+      return evaluateFormula(statFormula, variables)
     } else {
       return 0
     }
@@ -113,7 +129,7 @@ const ClassBasedStats = ({ generatedStats, onClassSelect }: ClassBasedStatsProps
 
   const getHitDie = () => {
     const classData = classes.find((c) => c.id == selectedClass)
-    return classData?.hit_die || "__"; // Default to 1d6 if class is not selected
+    return classData?.hit_die || "__"; // Default to blank if class is not selected
   };
 
   const handleRollHP = () => {
@@ -144,8 +160,6 @@ const ClassBasedStats = ({ generatedStats, onClassSelect }: ClassBasedStatsProps
   }
 
   const evaluateFormula = (formula: string, values: Record<string, number>) => {
-    console.log("evaluate formula", formula);
-    console.log("evaluate formula variables", values)
     return evaluate(formula, values);
   };
 
@@ -250,7 +264,8 @@ const ClassBasedStats = ({ generatedStats, onClassSelect }: ClassBasedStatsProps
                         calculateWillpower(
                           calculateBaseWillpower(generatedStats),
                           selectedClass,
-                          1
+                          1,
+                          classes
                         )
                       }</TableCell>
                     </TableRow>

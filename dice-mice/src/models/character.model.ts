@@ -8,9 +8,9 @@ export interface Character {
   classId: string;
   houseId: string;
   countyId: string;
-  current_base_stats: CharacterBaseStats;
-  original_base_stats: CharacterBaseStats;
-  hp_progression: CharacterHitPointProgression;
+  current_base_stats: Record<string, number>;
+  original_base_stats: Record<string, number>;
+  hp_progression: Record<number, number>; // {1, 2} i.e. Level 1, 2 HP
   skills: CharacterSkills[];
 }
 
@@ -21,12 +21,6 @@ interface CharacterBaseStats {
   wisdom: number;
   intelligence: number;
   charisma: number;
-}
-
-interface CharacterHitPointProgression {
-  1?: number;
-  2?: number;
-  3?: number;
 }
 
 export interface CharacterSkills {
