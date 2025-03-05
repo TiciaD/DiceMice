@@ -28,10 +28,15 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
       if (firebaseUser) {
-        const userDoc = await getDoc(doc(db, "players", firebaseUser.uid));
-        if (userDoc.exists()) {
-          setUserRef(userDoc)
-          setUser(userDoc.data() as User);
+        console.log("current firebase user", firebaseUser)
+        try {
+          const userDoc = await getDoc(doc(db, "players", firebaseUser.uid));
+          if (userDoc.exists()) {
+            setUserRef(userDoc)
+            setUser(userDoc.data() as User);
+          }
+        } catch (error) {
+          console.error("Could not fetch existing user", error)
         }
       }
       setLoading(false);

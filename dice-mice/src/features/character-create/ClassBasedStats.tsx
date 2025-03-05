@@ -15,9 +15,11 @@ import { rollDie } from "@/utils/dice-rolls";
 interface ClassBasedStatsProps {
   generatedStats: Record<string, number>;
   onClassSelect: (classId: string) => void;
+  onHitPointsUpdate: (hp: number) => void;
+  onNameUpdate: (name: string) => void;
 }
 
-const ClassBasedStats = ({ generatedStats, onClassSelect }: ClassBasedStatsProps) => {
+const ClassBasedStats = ({ generatedStats, onClassSelect, onHitPointsUpdate, onNameUpdate }: ClassBasedStatsProps) => {
   const { classes, stats } = useGameData();
   const [loading, setLoading] = useState(false);
   const [eligibleClasses, setEligibleClasses] = useState<Class[]>([]);
@@ -27,6 +29,7 @@ const ClassBasedStats = ({ generatedStats, onClassSelect }: ClassBasedStatsProps
   const [offensiveStats, setOffensiveStats] = useState<DerivedStat[]>([]);
   const [initiativeChart, setInitiativeChart] = useState<InitiativeEntry[]>([]);
   const [rolledHP, setRolledHP] = useState<number | null>(null);
+  const [name, setName] = useState('')
 
   useEffect(() => {
     setLoading(true)
@@ -144,7 +147,9 @@ const ClassBasedStats = ({ generatedStats, onClassSelect }: ClassBasedStatsProps
       rolledValue = rollDie(hitDie);
     } while (rolledValue <= conMod); // Reroll if ≤ CON mod
 
+
     setRolledHP(rolledValue);
+    onHitPointsUpdate(rolledValue);
   };
 
   const getInitiative = () => {
@@ -200,6 +205,12 @@ const ClassBasedStats = ({ generatedStats, onClassSelect }: ClassBasedStatsProps
                 label="Mouse Name"
                 fullWidth
                 variant="outlined"
+                value={name}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                  console.log("name value on change event", event)
+                  setName(event.target.value);
+                  onNameUpdate(event.target.value)
+                }}
               />
             </FormControl>
             <Box sx={{ display: "inline-flex", alignItems: 'center', gap: '1rem' }}>

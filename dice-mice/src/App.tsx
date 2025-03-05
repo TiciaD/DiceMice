@@ -11,6 +11,7 @@ import AuthCallback from './pages/AuthCallback';
 import { useUser } from './context/UserDataProvider';
 import { JSX } from 'react';
 import House from './features/house/House';
+import Logout from './pages/Logout';
 
 function App() {
 
@@ -28,6 +29,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/auth/discord/callback" element={<AuthCallback />} />
+          <Route path="/logout" element={<Logout />} />
           <Route path="/house" element={<ProtectedRoute><House /></ProtectedRoute>} />
           <Route path="/classes" element={<ProtectedRoute><ClassesView /></ProtectedRoute>} />
           <Route path="/skills" element={<ProtectedRoute><SkillsView /></ProtectedRoute>} />

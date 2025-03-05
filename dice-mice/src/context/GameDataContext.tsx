@@ -5,6 +5,7 @@ import { Stat } from "@/models/stat.model";
 import { db } from "@/utils/firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { useUser } from "./UserDataProvider";
 
 // Define context state
 interface GameDataContextType {
@@ -20,6 +21,7 @@ const GameDataContext = createContext<GameDataContextType | undefined>(undefined
 
 // Provider component
 export const GameDataProvider = ({ children }: { children: ReactNode }) => {
+  const { user, loading: userLoading } = useUser();
   const [counties, setCounties] = useState<County[]>([]);
   const [classes, setClasses] = useState<Class[]>([]);
   const [stats, setStats] = useState<Stat[]>([]);
@@ -27,6 +29,8 @@ export const GameDataProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!user || userLoading) return;
+
     const fetchGameData = async () => {
       try {
         setLoading(true);
@@ -59,7 +63,7 @@ export const GameDataProvider = ({ children }: { children: ReactNode }) => {
     };
 
     fetchGameData();
-  }, []);
+  }, [user, userLoading]);
 
   return (
     <GameDataContext.Provider value={{ classes, counties, stats, skills, loading }}>

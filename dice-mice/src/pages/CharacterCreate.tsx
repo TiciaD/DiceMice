@@ -11,6 +11,8 @@ import { useUser } from "@/context/UserDataProvider";
 import { PlayerHouse } from "@/models/player-house.model";
 import { getHouseByPlayerId } from "@/services/firestore-service";
 import { Link } from "react-router-dom";
+import { addDoc, collection } from "firebase/firestore";
+import { db } from "@/utils/firebase";
 
 const CharacterCreate = () => {
   const { counties } = useGameData();
@@ -63,7 +65,7 @@ const CharacterCreate = () => {
 
     const newCharacter: Character = {
       id: "", // Firestore will auto-generate this
-      name: "", // Name can be filled in later
+      name: name,
       trait: "",
       bio: "",
       xp: 0, // Defaults to 0
@@ -78,9 +80,9 @@ const CharacterCreate = () => {
     };
 
     try {
-      // const docRef = await addDoc(collection(db, "characters"), newCharacter);
-      // console.log("Character created with ID: ", docRef.id);
-      // alert("Character successfully created!");
+      const docRef = await addDoc(collection(db, "characters"), newCharacter);
+      console.log("Character created with ID: ", docRef.id);
+      alert("Character successfully created!");
       console.log("new character", newCharacter)
     } catch (error) {
       console.error("Error creating character: ", error);
@@ -152,7 +154,7 @@ const CharacterCreate = () => {
             <StatGeneration countyId={selectedCounty} onStatsGenerated={handleSubmit} />
           </Grid>
           <Grid size={{ xs: 12, md: 'grow' }}>
-            {submitted && <ClassBasedStats generatedStats={generatedStats} onClassSelect={setSelectedClass} />}
+            {submitted && <ClassBasedStats generatedStats={generatedStats} onClassSelect={setSelectedClass} onHitPointsUpdate={setHitPoints} onNameUpdate={setName} />}
           </Grid>
         </Grid>
       </Box>}
@@ -172,8 +174,8 @@ const CharacterCreate = () => {
         />
       </Box>}
       {/* Finalize Button */}
-      {currentHouse && !loading && Object.keys(generatedStats).length > 0 && (
-        <Button variant="contained" color="primary" sx={{ mt: 2 }}>
+      {currentHouse && !loading && (
+        <Button variant="contained" color="primary" sx={{ mt: 2 }} disabled={Object.keys(generatedStats).length == 0 || !name || !hitPoints || !selectedClass} onClick={handleFinalizeCharacter}>
           Finalize Character
         </Button>
       )}
