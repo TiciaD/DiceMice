@@ -14,15 +14,6 @@ export interface Character {
   skills: CharacterSkills[];
 }
 
-interface CharacterBaseStats {
-  strength: number;
-  constitution: number;
-  dexterity: number;
-  wisdom: number;
-  intelligence: number;
-  charisma: number;
-}
-
 export interface CharacterSkills {
   skillId: string;
   skillLevelId: string;

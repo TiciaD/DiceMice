@@ -125,7 +125,7 @@ const House = () => {
 
   return (
     <Box sx={{ mt: 2, mb: 2 }}>
-      {loading && <CircularProgress />}
+      {(loading || isDataLoading) && <CircularProgress />}
       {currentHouse != null ?
         <div>
           <Typography variant="h5" gutterBottom>House {currentHouse.name}</Typography>
