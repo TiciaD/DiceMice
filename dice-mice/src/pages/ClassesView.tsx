@@ -102,10 +102,17 @@ const ClassesView = () => {
                 <Typography gutterBottom variant="h5" component="div">
                   {cls.name}
                 </Typography>
-                <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1.5 }} gutterBottom>
+                <Typography variant="body1" sx={{ color: 'text.secondary', mb: 1.5 }} gutterBottom>
                   {cls.description}
                 </Typography>
-                <Typography sx={{ color: 'text.secondary' }}>{cls.skillIds.map((skillId) => getSkillName(skillId)).join(', ')}</Typography>
+                <Box sx={{ display: 'flex', mb: 1.5, flexWrap: 'wrap' }}>
+                  <Typography variant="subtitle1" sx={{ color: 'text.secondary', mr: 1 }}>
+                    Skills:
+                  </Typography>
+                  <Typography variant="subtitle1">
+                    {cls.skillIds.map((skillId) => getSkillName(skillId)).join(', ')}
+                  </Typography>
+                </Box>
               </CardContent>
               {/* <CardActions disableSpacing>
                 <IconButton aria-label="add to favorites">

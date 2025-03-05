@@ -1,20 +1,20 @@
-import Characters from "@/features/character/Characters";
-import CreatePlayerDialog from "@/features/create-player/CreatePlayerDialog";
-import House from "@/features/house/House";
-import { PlayerHouse } from "@/models/player-house.model";
-import { SelectOption } from "@/models/select.model";
-import { getAllPlayers, getHouseByPlayerId } from "@/services/firestore-service";
-import { Avatar, Box, Button, CircularProgress, Container, Divider, FormControl, IconButton, InputLabel, MenuItem, Select, Tab, Tabs, Tooltip, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
+// import Characters from "@/features/character/Characters";
+// import CreatePlayerDialog from "@/features/create-player/CreatePlayerDialog";
+// import House from "@/features/house/House";
+// import { PlayerHouse } from "@/models/player-house.model";
+// import { SelectOption } from "@/models/select.model";
+// import { getAllPlayers, getHouseByPlayerId } from "@/services/firestore-service";
+import { Box, Container, IconButton, Tooltip, Typography } from "@mui/material";
+// import { useState } from "react";
 
 
 const Home = () => {
-  const [currentPlayer, setCurrentPlayer] = useState<string>('')
-  const [currentHouse, setCurrentHouse] = useState<PlayerHouse | null>(null)
-  const [players, setPlayers] = useState<SelectOption[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [activeTab, setActiveTab] = useState(0);
+  // const [currentPlayer, setCurrentPlayer] = useState<string>('')
+  // const [currentHouse, setCurrentHouse] = useState<PlayerHouse | null>(null)
+  // const [players, setPlayers] = useState<SelectOption[]>([]);
+  // const [loading, setLoading] = useState<boolean>(false);
+  // const [openDialog, setOpenDialog] = useState(false);
+  // const [activeTab, setActiveTab] = useState(0);
 
   // Fetch players from Firestore on component mount
   // useEffect(() => {

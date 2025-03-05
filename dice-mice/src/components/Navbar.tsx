@@ -8,6 +8,7 @@ import { NavigationLinks, UserMenuNavigationLinks } from "@/utils/navigation-lin
 const Navbar = () => {
   const { user } = useUser();
   const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
+  // const [anchorElRulesNav, setAnchorElRulesNav] = useState<null | HTMLElement>(null);
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
 
   const navLinks = NavigationLinks
@@ -15,6 +16,11 @@ const Navbar = () => {
   const handleOpenNavMenu = (event: MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
   };
+
+  // const handleOpenRulesNavMenu = (event: MouseEvent<HTMLElement>) => {
+  //   setAnchorElRulesNav(event.currentTarget);
+  // };
+
   const handleOpenUserMenu = (event: MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget);
   };
@@ -22,6 +28,10 @@ const Navbar = () => {
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
   };
+
+  // const handleCloseRulesNavMenu = () => {
+  //   setAnchorElRulesNav(null);
+  // };
 
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
