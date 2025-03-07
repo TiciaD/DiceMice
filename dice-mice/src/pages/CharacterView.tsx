@@ -1,4 +1,3 @@
-import { useGameData } from "@/context/GameDataContext";
 import { useUser } from "@/context/UserDataProvider";
 import CharacterSheet from "@/features/character/CharacterSheet";
 import { Character } from "@/models/character.model";
@@ -23,6 +22,7 @@ const CharacterView = () => {
 
   useEffect(() => {
     setIsLoading(true)
+    console.log("current house", currentHouse)
 
     if (characterId) {
       fetchCharacter()

@@ -20,7 +20,7 @@ const CharacterSheet = ({ character }: CharacterSheetProps) => {
   const [generatedStats, setGeneratedStats] = useState<Record<string, number>>({});
   const [hitPoints, setHitPoints] = useState(0);
   const [name, setName] = useState('');
-  const [openSkillsDialog, setOpenSkillsDialog] = useState(false);
+  // const [openSkillsDialog, setOpenSkillsDialog] = useState(false);
 
   useEffect(() => {
     if (character && counties) {
@@ -34,6 +34,9 @@ const CharacterSheet = ({ character }: CharacterSheetProps) => {
       setIsLoading(false)
     }
 
+    console.log("name", name)
+    console.log("hitpoints", hitPoints)
+    console.log(selectedSkills)
   }, [character, counties])
 
   const getCurrentHitPoints = (char: Character) => {
