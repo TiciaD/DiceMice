@@ -22,7 +22,7 @@ function App() {
 
     if (code) {
       console.log("Redirecting to /auth/discord/callback with code:", code);
-      navigate(`/auth/discord/callback?code=${code}`); // Redirect properly if from discord
+      navigate(`/auth/discord/callback?code=${code}`, { replace: true }); // Redirect properly if from discord
     }
   }, [location, navigate]);
 
