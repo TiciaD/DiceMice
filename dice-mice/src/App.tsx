@@ -1,5 +1,5 @@
 import './App.css'
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import CharacterView from './pages/CharacterView';
 import Home from './pages/Home';
@@ -9,7 +9,7 @@ import SkillsView from './pages/SkillsView';
 import ClassesView from './pages/ClassesView';
 import AuthCallback from './pages/AuthCallback';
 import { useUser } from './context/UserDataProvider';
-import { JSX } from 'react';
+import { JSX, useEffect } from 'react';
 import House from './features/house/House';
 import Logout from './pages/Logout';
 
@@ -17,6 +17,18 @@ function App() {
 
   const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
     const { user, loading } = useUser();
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+      const urlParams = new URLSearchParams(location.search);
+      const code = urlParams.get("code");
+
+      if (code) {
+        console.log("Redirecting to /auth/discord/callback with code:", code);
+        navigate(`/auth/discord/callback?code=${code}`); // Redirect properly if from discord
+      }
+    }, [location, navigate]);
 
     if (loading) return <p>Loading...</p>; // Show loading state
     return user ? children : <Navigate to="/" />;
