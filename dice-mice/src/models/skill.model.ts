@@ -3,4 +3,5 @@ export interface Skill {
   name: string;
   description: string;
   associatedStatId: string;
+  benefits: Record<string, string>;
 }

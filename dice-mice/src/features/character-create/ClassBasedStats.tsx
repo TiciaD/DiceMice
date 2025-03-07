@@ -5,56 +5,54 @@ import { evaluate } from "mathjs";
 import { useGameData } from "@/context/GameDataContext";
 import { Class } from "@/models/class.model";
 import { DerivedStat } from "@/models/derived-stat.model";
-import { SkillLevel } from "@/models/skill-level.model";
 import { db } from "@/utils/firebase";
 import { calculateBaseWillpower, calculateModifier, calculateWillpower } from "@/utils/stat-calculations";
 import { fetchInitiativeChart } from "@/services/firestore-service";
 import { InitiativeEntry } from "@/models/initiative-entry.model";
 import { rollDie } from "@/utils/dice-rolls";
 
+
 interface ClassBasedStatsProps {
   generatedStats: Record<string, number>;
+  currentClass?: string;
+  charLevel?: number;
   onClassSelect: (classId: string) => void;
+  onHitPointsUpdate: (hp: number) => void;
+  onNameUpdate: (name: string) => void;
 }
 
-const ClassBasedStats = ({ generatedStats, onClassSelect }: ClassBasedStatsProps) => {
+const ClassBasedStats = ({ generatedStats, charLevel, currentClass, onClassSelect, onHitPointsUpdate, onNameUpdate }: ClassBasedStatsProps) => {
   const { classes, stats } = useGameData();
   const [loading, setLoading] = useState(false);
   const [eligibleClasses, setEligibleClasses] = useState<Class[]>([]);
-  const [selectedClass, setSelectedClass] = useState<string>("");
+  const [selectedClass, setSelectedClass] = useState<string>(currentClass ?? '');
   const [derivedStats, setDerivedStats] = useState<DerivedStat[]>([]);
   const [defensiveStats, setDefensiveStats] = useState<DerivedStat[]>([]);
   const [offensiveStats, setOffensiveStats] = useState<DerivedStat[]>([]);
   const [initiativeChart, setInitiativeChart] = useState<InitiativeEntry[]>([]);
-  const [skillLevels, setSkillLevels] = useState<SkillLevel[]>([]);
   const [rolledHP, setRolledHP] = useState<number | null>(null);
-
-  useEffect(() => {
-    console.log("skill levels", skillLevels)
-  }, [skillLevels]);
+  const [selectedLevel, setSelectedLevel] = useState(1)
+  const [name, setName] = useState('')
 
   useEffect(() => {
     setLoading(true)
+    if (charLevel) {
+      setSelectedLevel(charLevel)
+    }
     const fetchData = async () => {
       // Fetch Derived Stats
       const derivedStatsSnapshot = await getDocs(collection(db, "derived_stats"));
-      console.log("derived stats snap", derivedStatsSnapshot)
       const fetchedDerivedStats = derivedStatsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DerivedStat));
-      console.log("fetched derived stats", fetchedDerivedStats)
-      console.log("filter", fetchedDerivedStats.filter(stat => stat.type === "DEFENSE"))
       setDerivedStats(fetchedDerivedStats);
+
       setDefensiveStats(fetchedDerivedStats.filter(stat => stat.type === "DEFENSE"));
       setOffensiveStats(fetchedDerivedStats.filter((stat) => stat.type === "NON-CALCULATED"))
 
       // Fetch initiative chart
       const chart = await fetchInitiativeChart();
-      console.log("chart", chart)
+      // console.log("chart", chart)
       setInitiativeChart(chart);
 
-      // Fetch Skill Levels
-      const skillLevelsSnapshot = await getDocs(collection(db, "skill_levels"));
-      const fetchedSkillLevels = skillLevelsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SkillLevel));
-      setSkillLevels(fetchedSkillLevels);
       setLoading(false)
     }
 
@@ -78,10 +76,11 @@ const ClassBasedStats = ({ generatedStats, onClassSelect }: ClassBasedStatsProps
 
   const getNonCalculatedStatValue = (derivedStat: DerivedStat) => {
     if (!selectedClass) return 0;
+    const level = selectedLevel
 
     const currentClass = classes.find((c) => c.id == selectedClass)
     if (currentClass) {
-      const levelOneClassStatValues = currentClass.baseValues[1]
+      const levelOneClassStatValues = currentClass.baseValues[level]
       return levelOneClassStatValues[derivedStat.id] || 0
     } else {
       return 0;
@@ -91,29 +90,48 @@ const ClassBasedStats = ({ generatedStats, onClassSelect }: ClassBasedStatsProps
 
   const getDerivedStatValue = (derivedStat: DerivedStat) => {
     if (!selectedClass) return 0;
+    const level = selectedLevel
 
     const currentClass = classes.find((c) => c.id == selectedClass)
 
     // Prepare variable values
+    let statFormula = derivedStat.formula; // Default formula
+    let statVariables = [...derivedStat.variables]; // Default variables
     const variables: Record<string, number> = {};
+
 
     console.log("derived stats", derivedStats)
     if (currentClass?.baseValues) {
-      derivedStat.variables.forEach((variable) => {
-        const levelOneClassStatValues = currentClass.baseValues[1]
+      // Check if this class has an overriding ability for this stat
+      const applicableOverride = derivedStat.overrides?.find(override =>
+        override.classId === selectedClass &&
+        level >= override.minLevel && // Ensure character is at or above required level
+        currentClass.abilities.some(ability => ability.name === override.abilityName)
+      );
+
+      if (applicableOverride) {
+        // Override formula and variables if present
+        if (applicableOverride.newFormula) statFormula = applicableOverride.newFormula;
+        if (applicableOverride.newVariables) statVariables = applicableOverride.newVariables;
+      }
+
+      console.log("statFormula", statFormula)
+      console.log("stat variables", statVariables)
+      statVariables.forEach((variable) => {
+        const levelOneClassStatValues = currentClass.baseValues[level]
         if (variable == 'base') {
-          variables["base"] = levelOneClassStatValues[derivedStat.id] || 0
+          variables["base"] = Number(levelOneClassStatValues[derivedStat.id]) || 0
         } else {
-          console.log("does this match abbrieviation", variable.replace("_mod", "").toUpperCase())
+          // console.log("does this match abbrieviation", variable.replace("_mod", "").toUpperCase())
           const matchingStat = stats.find((stat) => {
             return variable.replace("_mod", "").toUpperCase() == stat.abbreviation
           })
-          console.log("generated stats", generatedStats)
+          // console.log("generated stats", generatedStats)
           variables[variable] = matchingStat ? calculateModifier(generatedStats[matchingStat.id]) : 0
         }
       })
 
-      return evaluateFormula(derivedStat.formula, variables)
+      return evaluateFormula(statFormula, variables)
     } else {
       return 0
     }
@@ -122,17 +140,24 @@ const ClassBasedStats = ({ generatedStats, onClassSelect }: ClassBasedStatsProps
 
   const getHitDie = () => {
     const classData = classes.find((c) => c.id == selectedClass)
-    return classData?.hit_die || "1d6"; // Default to 1d6 if class is not selected
+    return classData?.hit_die || "__"; // Default to blank if class is not selected
   };
 
   const handleRollHP = () => {
     if (!selectedClass) return;
 
     const hitDie = getHitDie();
-    const rolledValue = rollDie(hitDie);
-    const conMod = Math.max(0, calculateModifier(generatedStats["constitution"])); // Only add positive CON mod?
+    const conMod = Math.max(0, calculateModifier(generatedStats["constitution"]));
 
-    setRolledHP(rolledValue + conMod);
+    let rolledValue;
+
+    do {
+      rolledValue = rollDie(hitDie);
+    } while (rolledValue <= conMod); // Reroll if ≤ CON mod
+
+
+    setRolledHP(rolledValue);
+    onHitPointsUpdate(rolledValue);
   };
 
   const getInitiative = () => {
@@ -140,7 +165,7 @@ const ClassBasedStats = ({ generatedStats, onClassSelect }: ClassBasedStatsProps
       const dexModifier = calculateModifier(generatedStats["dexterity"])
       const entry = initiativeChart.find(e => e.modifier === dexModifier);
       if (entry) {
-        return `${entry.diceRolled} ${dexModifier > 0 ? '+' : ''}${dexModifier}`;
+        return `${entry.diceRolled} ${dexModifier > 0 ? '+' : ''}${dexModifier ? dexModifier : ''}`;
       } else {
         return "Unknown"
       }
@@ -148,8 +173,6 @@ const ClassBasedStats = ({ generatedStats, onClassSelect }: ClassBasedStatsProps
   }
 
   const evaluateFormula = (formula: string, values: Record<string, number>) => {
-    console.log("evaluate formula", formula);
-    console.log("evaluate formula variables", values)
     return evaluate(formula, values);
   };
 
@@ -161,7 +184,7 @@ const ClassBasedStats = ({ generatedStats, onClassSelect }: ClassBasedStatsProps
         <Box sx={{ pt: 1 }}>
 
           <Box sx={{ width: '100%', display: 'flex', flexDirection: { xs: "column", md: "row" }, gap: 1, mb: 1 }}>
-            <FormControl fullWidth sx={{ maxWidth: { xs: '100%', md: '200px' } }} >
+            {classes.length > 0 && <FormControl fullWidth sx={{ maxWidth: { xs: '100%', md: '200px' } }} >
               <InputLabel>Class</InputLabel>
               <Select
                 label="Class"
@@ -182,6 +205,23 @@ const ClassBasedStats = ({ generatedStats, onClassSelect }: ClassBasedStatsProps
                   <MenuItem disabled>No eligible classes</MenuItem>
                 )}
               </Select>
+            </FormControl>}
+            <FormControl sx={{ maxWidth: { xs: '100%', md: '100px' } }} >
+              <InputLabel>Level</InputLabel>
+              <Select
+                label="Level"
+                value={selectedLevel}
+                onChange={(e) => {
+                  setSelectedLevel(e.target.value as number);
+                }}
+              >
+                {[1, 2, 3, 4, 5, 6, 7].map((level, i) => (
+                  <MenuItem key={`${level}_${i}`} value={level}>
+                    {level}
+                  </MenuItem>
+                ))
+                }
+              </Select>
             </FormControl>
             <FormControl >
               <TextField
@@ -190,6 +230,12 @@ const ClassBasedStats = ({ generatedStats, onClassSelect }: ClassBasedStatsProps
                 label="Mouse Name"
                 fullWidth
                 variant="outlined"
+                value={name}
+                onChange={(event) => {
+                  console.log("name value on change event", event)
+                  setName(event.target.value);
+                  onNameUpdate(event.target.value)
+                }}
               />
             </FormControl>
             <Box sx={{ display: "inline-flex", alignItems: 'center', gap: '1rem' }}>
@@ -254,7 +300,8 @@ const ClassBasedStats = ({ generatedStats, onClassSelect }: ClassBasedStatsProps
                         calculateWillpower(
                           calculateBaseWillpower(generatedStats),
                           selectedClass,
-                          1
+                          1,
+                          classes
                         )
                       }</TableCell>
                     </TableRow>
@@ -266,7 +313,7 @@ const ClassBasedStats = ({ generatedStats, onClassSelect }: ClassBasedStatsProps
                 </Table>
               </TableContainer>
             }
-            {selectedClass && defensiveStats.length > 0 &&
+            {selectedClass && offensiveStats.length > 0 &&
               <TableContainer component={Paper} sx={{ maxWidth: 250, height: 'fit-content' }}>
                 <Table aria-label="simple table">
                   <TableHead>

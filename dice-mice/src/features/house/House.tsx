@@ -1,19 +1,20 @@
 import { PlayerHouse } from '@/models/player-house.model'
 import { useEffect, useState } from 'react'
 import HouseInfo from './HouseInfo'
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material'
+import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material'
 import { useGameData } from '@/context/GameDataContext'
 import { addDoc, collection, doc, getDoc } from 'firebase/firestore'
 import { db } from '@/utils/firebase'
+import { useUser } from '@/context/UserDataProvider'
+import { getHouseByPlayerId } from '@/services/firestore-service'
+import Characters from '../character/Characters'
 
-interface HouseProps {
-  house: PlayerHouse | null;
-  playerId: string;
-}
-const House = (props: HouseProps) => {
+const House = () => {
   const { counties, loading } = useGameData();
+  const { user, userRef, house, setHouse } = useUser();
 
-  const [currentHouse, setCurrentHouse] = useState<PlayerHouse | null>(props.house)
+  const [isDataLoading, setIsDataLoading] = useState(false);
+  const [currentHouse, setCurrentHouse] = useState<PlayerHouse | null>(house)
   const [openCreateHouseDialog, setOpenCreateHouseDialog] = useState(false)
   const [houseFormData, setHouseFormData] = useState({
     name: '',
@@ -28,25 +29,29 @@ const House = (props: HouseProps) => {
   });
 
   useEffect(() => {
-    if (!props.house) {
-      const fetchHouse = async () => {
-        try {
-          const houseRef = doc(db, "houses", props.playerId);
-          const houseSnap = await getDoc(houseRef);
-
-          if (houseSnap.exists()) {
-            setCurrentHouse({ id: houseSnap.id, ...houseSnap.data() } as PlayerHouse);
-          } else {
-            setCurrentHouse(null);
-          }
-        } catch (error) {
-          console.error("Error fetching house:", error);
-        }
-      };
-
+    if (!house) {
       fetchHouse();
     }
-  }, [props.house, props.playerId]);
+  }, [house, user]);
+
+  const fetchHouse = async () => {
+    setIsDataLoading(true);
+    try {
+      if (user) {
+        const foundHouse = await getHouseByPlayerId(user.id)
+
+        if (foundHouse) {
+          setCurrentHouse(foundHouse);
+          setHouse(foundHouse);
+        } else {
+          setCurrentHouse(null);
+        }
+      }
+      setIsDataLoading(false)
+    } catch (error) {
+      console.error("Error fetching house:", error);
+    }
+  };
 
   const handleOpen = () => setOpenCreateHouseDialog(true);
   const handleClose = () => {
@@ -80,33 +85,36 @@ const House = (props: HouseProps) => {
 
     try {
       setSubmitting(true);
+      console.log("user", user)
 
-      // Get reference to the current player
-      const playerRef = doc(db, 'players', props.playerId);
+      if (user && userRef) {
+        // Get reference to the current player
+        const playerRef = doc(db, 'players', user.id);
 
-      // Save house to Firestore
-      const newHouseRef = await addDoc(collection(db, 'houses'), {
-        name: houseFormData.name,
-        motto: houseFormData.motto,
-        countyId: houseFormData.countyId,
-        bio: houseFormData.bio,
-        gold: 0,
-        playerId: playerRef, // Store as Firestore reference
-        createdAt: new Date(),
-      });
+        // Save house to Firestore
+        const newHouseRef = await addDoc(collection(db, 'houses'), {
+          name: houseFormData.name,
+          motto: houseFormData.motto,
+          countyId: houseFormData.countyId,
+          bio: houseFormData.bio,
+          gold: 0,
+          playerId: playerRef, // Store as Firestore reference
+          createdAt: new Date(),
+        });
 
-      console.log('House created successfully:', newHouseRef.id);
+        console.log('House created successfully:', newHouseRef.id);
 
-      // Set new house in state
-      setCurrentHouse({
-        id: newHouseRef.id,
-        name: houseFormData.name,
-        motto: houseFormData.motto,
-        countyId: houseFormData.countyId,
-        bio: houseFormData.bio,
-        gold: 0,
-        playerId: playerRef.id,
-      });
+        // Set new house in state
+        setCurrentHouse({
+          id: newHouseRef.id,
+          name: houseFormData.name,
+          motto: houseFormData.motto,
+          countyId: houseFormData.countyId,
+          bio: houseFormData.bio,
+          gold: 0,
+          playerId: user.id,
+        });
+      }
 
       handleClose(); // Close the dialog
     } catch (error) {
@@ -117,14 +125,19 @@ const House = (props: HouseProps) => {
   };
 
   return (
-    <Box sx={{ mt: 2, mb: 2 }}>
+    <Box sx={{ m: 2 }}>
+      {(loading || isDataLoading) && <CircularProgress />}
       {currentHouse != null ?
-        <div>
+        <Box>
           <Typography variant="h5" gutterBottom>House {currentHouse.name}</Typography>
           <HouseInfo house={currentHouse} setHouse={setCurrentHouse} />
-        </div> :
-        <div>
-          <Typography variant="subtitle1" gutterBottom>No House Found for selected player</Typography>
+          <Box sx={{ pt: 3 }}>
+            <Typography variant="h5">{currentHouse.name} Mice</Typography>
+            <Characters house={currentHouse} />
+          </Box>
+        </Box> :
+        <Box>
+          <Typography variant="subtitle1" gutterBottom>No House Found.</Typography>
           <Button variant="contained" onClick={handleOpen}>
             Create House
           </Button>
@@ -209,7 +222,7 @@ const House = (props: HouseProps) => {
               </DialogActions>
             </form>
           </Dialog>
-        </div>
+        </Box>
       }
     </Box>
   )

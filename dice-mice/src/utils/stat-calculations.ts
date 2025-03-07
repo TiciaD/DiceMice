@@ -1,4 +1,4 @@
-import { useGameData } from '@/context/GameDataContext';
+import { Class } from '@/models/class.model';
 
 export const calculateBaseWillpower = (
   stats: Record<string, number>
@@ -16,10 +16,9 @@ export const calculateModifier = (statValue: number) =>
 export const calculateWillpower = (
   baseWillpower: number,
   classId: string,
-  level: number
+  level: number,
+  classes: Class[]
 ) => {
-  const { classes } = useGameData();
-
   const classData = classes.find((c) => c.id == classId);
 
   if (classData) {

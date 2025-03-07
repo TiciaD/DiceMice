@@ -4,13 +4,16 @@ import './index.css'
 import App from './App.tsx'
 import { GameDataProvider } from './context/GameDataContext.tsx'
 import { BrowserRouter } from 'react-router-dom'
+import { UserDataProvider } from './context/UserDataProvider.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
-      <GameDataProvider>
-        <App />
-      </GameDataProvider>
+      <UserDataProvider>
+        <GameDataProvider>
+          <App />
+        </GameDataProvider>
+      </UserDataProvider>
     </BrowserRouter>
   </StrictMode>,
 )
