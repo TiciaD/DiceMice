@@ -129,7 +129,7 @@ const Navbar = () => {
         <Box sx={{ flexGrow: 0 }}>
           {user ?
             <Tooltip title={user.username}>
-              <IconButton>
+              <IconButton onClick={handleOpenUserMenu}>
                 <Avatar alt={user.username} src={`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`} />
               </IconButton>
             </Tooltip>
@@ -138,7 +138,7 @@ const Navbar = () => {
               <a
                 href={`https://discord.com/oauth2/authorize?client_id=${import.meta.env.VITE_DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(import.meta.env.VITE_DISCORD_REDIRECT_URI)}&response_type=code&scope=identify+email`}
               >
-                <IconButton onClick={handleOpenUserMenu}>
+                <IconButton>
                   <img
                     width="40px"
                     height="40px"
@@ -167,7 +167,9 @@ const Navbar = () => {
           >
             {UserMenuNavigationLinks.map((userMenuLink) => (
               <MenuItem key={userMenuLink.path} onClick={handleCloseUserMenu}>
-                <Typography sx={{ textAlign: 'center' }}>{userMenuLink.label}</Typography>
+                <Link to={userMenuLink.path}>
+                  <Typography sx={{ textAlign: 'center' }}>{userMenuLink.label}</Typography>
+                </Link>
               </MenuItem>
             ))}
           </Menu>

@@ -14,25 +14,31 @@ import { rollDie } from "@/utils/dice-rolls";
 
 interface ClassBasedStatsProps {
   generatedStats: Record<string, number>;
+  currentClass?: string;
+  charLevel?: number;
   onClassSelect: (classId: string) => void;
   onHitPointsUpdate: (hp: number) => void;
   onNameUpdate: (name: string) => void;
 }
 
-const ClassBasedStats = ({ generatedStats, onClassSelect, onHitPointsUpdate, onNameUpdate }: ClassBasedStatsProps) => {
+const ClassBasedStats = ({ generatedStats, charLevel, currentClass, onClassSelect, onHitPointsUpdate, onNameUpdate }: ClassBasedStatsProps) => {
   const { classes, stats } = useGameData();
   const [loading, setLoading] = useState(false);
   const [eligibleClasses, setEligibleClasses] = useState<Class[]>([]);
-  const [selectedClass, setSelectedClass] = useState<string>("");
+  const [selectedClass, setSelectedClass] = useState<string>(currentClass ?? '');
   const [derivedStats, setDerivedStats] = useState<DerivedStat[]>([]);
   const [defensiveStats, setDefensiveStats] = useState<DerivedStat[]>([]);
   const [offensiveStats, setOffensiveStats] = useState<DerivedStat[]>([]);
   const [initiativeChart, setInitiativeChart] = useState<InitiativeEntry[]>([]);
   const [rolledHP, setRolledHP] = useState<number | null>(null);
+  const [selectedLevel, setSelectedLevel] = useState(1)
   const [name, setName] = useState('')
 
   useEffect(() => {
     setLoading(true)
+    if (charLevel) {
+      setSelectedLevel(charLevel)
+    }
     const fetchData = async () => {
       // Fetch Derived Stats
       const derivedStatsSnapshot = await getDocs(collection(db, "derived_stats"));
@@ -70,10 +76,11 @@ const ClassBasedStats = ({ generatedStats, onClassSelect, onHitPointsUpdate, onN
 
   const getNonCalculatedStatValue = (derivedStat: DerivedStat) => {
     if (!selectedClass) return 0;
+    const level = selectedLevel
 
     const currentClass = classes.find((c) => c.id == selectedClass)
     if (currentClass) {
-      const levelOneClassStatValues = currentClass.baseValues[1]
+      const levelOneClassStatValues = currentClass.baseValues[level]
       return levelOneClassStatValues[derivedStat.id] || 0
     } else {
       return 0;
@@ -83,6 +90,7 @@ const ClassBasedStats = ({ generatedStats, onClassSelect, onHitPointsUpdate, onN
 
   const getDerivedStatValue = (derivedStat: DerivedStat) => {
     if (!selectedClass) return 0;
+    const level = selectedLevel
 
     const currentClass = classes.find((c) => c.id == selectedClass)
 
@@ -97,7 +105,7 @@ const ClassBasedStats = ({ generatedStats, onClassSelect, onHitPointsUpdate, onN
       // Check if this class has an overriding ability for this stat
       const applicableOverride = derivedStat.overrides?.find(override =>
         override.classId === selectedClass &&
-        1 >= override.minLevel && // Ensure character is at or above required level - in this case Level 1
+        level >= override.minLevel && // Ensure character is at or above required level
         currentClass.abilities.some(ability => ability.name === override.abilityName)
       );
 
@@ -110,7 +118,7 @@ const ClassBasedStats = ({ generatedStats, onClassSelect, onHitPointsUpdate, onN
       console.log("statFormula", statFormula)
       console.log("stat variables", statVariables)
       statVariables.forEach((variable) => {
-        const levelOneClassStatValues = currentClass.baseValues[1]
+        const levelOneClassStatValues = currentClass.baseValues[level]
         if (variable == 'base') {
           variables["base"] = Number(levelOneClassStatValues[derivedStat.id]) || 0
         } else {
@@ -176,7 +184,7 @@ const ClassBasedStats = ({ generatedStats, onClassSelect, onHitPointsUpdate, onN
         <Box sx={{ pt: 1 }}>
 
           <Box sx={{ width: '100%', display: 'flex', flexDirection: { xs: "column", md: "row" }, gap: 1, mb: 1 }}>
-            <FormControl fullWidth sx={{ maxWidth: { xs: '100%', md: '200px' } }} >
+            {classes.length > 0 && <FormControl fullWidth sx={{ maxWidth: { xs: '100%', md: '200px' } }} >
               <InputLabel>Class</InputLabel>
               <Select
                 label="Class"
@@ -197,6 +205,23 @@ const ClassBasedStats = ({ generatedStats, onClassSelect, onHitPointsUpdate, onN
                   <MenuItem disabled>No eligible classes</MenuItem>
                 )}
               </Select>
+            </FormControl>}
+            <FormControl sx={{ maxWidth: { xs: '100%', md: '100px' } }} >
+              <InputLabel>Level</InputLabel>
+              <Select
+                label="Level"
+                value={selectedLevel}
+                onChange={(e) => {
+                  setSelectedLevel(e.target.value as number);
+                }}
+              >
+                {[1, 2, 3, 4, 5, 6, 7].map((level, i) => (
+                  <MenuItem key={`${level}_${i}`} value={level}>
+                    {level}
+                  </MenuItem>
+                ))
+                }
+              </Select>
             </FormControl>
             <FormControl >
               <TextField
@@ -206,7 +231,7 @@ const ClassBasedStats = ({ generatedStats, onClassSelect, onHitPointsUpdate, onN
                 fullWidth
                 variant="outlined"
                 value={name}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                onChange={(event) => {
                   console.log("name value on change event", event)
                   setName(event.target.value);
                   onNameUpdate(event.target.value)
@@ -288,7 +313,7 @@ const ClassBasedStats = ({ generatedStats, onClassSelect, onHitPointsUpdate, onN
                 </Table>
               </TableContainer>
             }
-            {selectedClass && defensiveStats.length > 0 &&
+            {selectedClass && offensiveStats.length > 0 &&
               <TableContainer component={Paper} sx={{ maxWidth: 250, height: 'fit-content' }}>
                 <Table aria-label="simple table">
                   <TableHead>

@@ -7,10 +7,11 @@ import { ChangeEvent, useEffect, useState } from "react";
 
 interface StatGenerationProps {
   countyId: string;
+  generatedStats?: Record<string, number>
   onStatsGenerated: (stats: Record<string, number>) => void
 }
 
-const StatGeneration = ({ countyId, onStatsGenerated }: StatGenerationProps) => {
+const StatGeneration = ({ generatedStats, countyId, onStatsGenerated }: StatGenerationProps) => {
   const { counties, stats } = useGameData();
   const [statValues, setStatValues] = useState<Record<string, number>>({});
   const [associatedStat, setAssociatedStat] = useState<string | null>(null);
@@ -21,11 +22,22 @@ const StatGeneration = ({ countyId, onStatsGenerated }: StatGenerationProps) => 
     return statOrder.indexOf(a.abbreviation) - statOrder.indexOf(b.abbreviation);
   });
 
+  useEffect(() => {
+    if (generatedStats && stats) {
+      console.log("generated stats in statGeneration component", generatedStats)
+      if (JSON.stringify(statValues) !== JSON.stringify(generatedStats)) {
+        setStatValues({ ...generatedStats });
+      }
+    }
+  }, [generatedStats, stats]);
+
+
+
   // Find associated stat when countyId changes
   useEffect(() => {
     const county = counties.find(c => c.id === countyId);
     setAssociatedStat(county ? county.associatedStatId : null);
-    setStatValues({}); // Reset stats when county changes
+    // setStatValues({}); // Reset stats when county changes
   }, [countyId, counties]);
 
   // Check if all stats are filled
@@ -46,6 +58,8 @@ const StatGeneration = ({ countyId, onStatsGenerated }: StatGenerationProps) => 
         <Box sx={{ display: 'inline-flex', flexDirection: 'column', width: '13rem', gap: '0.25rem' }}>
           {sortedStats.map((stat) => {
             const isAssociatedStat = stat.id === associatedStat;
+            console.log("stat values", statValues)
+            console.log("generated stats", generatedStats)
             return (
               <Box key={stat.id} sx={{ display: 'inline-flex', width: '100%' }}>
                 <Grid container spacing={2} columns={24}>
@@ -65,7 +79,7 @@ const StatGeneration = ({ countyId, onStatsGenerated }: StatGenerationProps) => 
                             min: 0,
                           }
                         }}
-                        value={statValues[stat.id] ?? ""}
+                        value={statValues[stat.id] ?? 0}
                         onChange={(e) => handleInputStats(e, stat)}
                       />
                     </FormControl>

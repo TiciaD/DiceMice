@@ -6,6 +6,8 @@ import { useGameData } from '@/context/GameDataContext'
 import { addDoc, collection, doc, getDoc } from 'firebase/firestore'
 import { db } from '@/utils/firebase'
 import { useUser } from '@/context/UserDataProvider'
+import { getHouseByPlayerId } from '@/services/firestore-service'
+import Characters from '../character/Characters'
 
 const House = () => {
   const { counties, loading } = useGameData();
@@ -36,12 +38,11 @@ const House = () => {
     setIsDataLoading(true);
     try {
       if (user) {
-        const houseRef = doc(db, "houses", user.id);
-        const houseSnap = await getDoc(houseRef);
+        const foundHouse = await getHouseByPlayerId(user.id)
 
-        if (houseSnap.exists()) {
-          setCurrentHouse({ id: houseSnap.id, ...houseSnap.data() } as PlayerHouse);
-          setHouse({ id: houseSnap.id, ...houseSnap.data() } as PlayerHouse);
+        if (foundHouse) {
+          setCurrentHouse(foundHouse);
+          setHouse(foundHouse);
         } else {
           setCurrentHouse(null);
         }
@@ -124,15 +125,19 @@ const House = () => {
   };
 
   return (
-    <Box sx={{ mt: 2, mb: 2 }}>
+    <Box sx={{ m: 2 }}>
       {(loading || isDataLoading) && <CircularProgress />}
       {currentHouse != null ?
-        <div>
+        <Box>
           <Typography variant="h5" gutterBottom>House {currentHouse.name}</Typography>
           <HouseInfo house={currentHouse} setHouse={setCurrentHouse} />
-        </div> :
-        <div>
-          <Typography variant="subtitle1" gutterBottom>No House Found for selected player</Typography>
+          <Box sx={{ pt: 3 }}>
+            <Typography variant="h5">{currentHouse.name} Mice</Typography>
+            <Characters house={currentHouse} />
+          </Box>
+        </Box> :
+        <Box>
+          <Typography variant="subtitle1" gutterBottom>No House Found.</Typography>
           <Button variant="contained" onClick={handleOpen}>
             Create House
           </Button>
@@ -217,7 +222,7 @@ const House = () => {
               </DialogActions>
             </form>
           </Dialog>
-        </div>
+        </Box>
       }
     </Box>
   )

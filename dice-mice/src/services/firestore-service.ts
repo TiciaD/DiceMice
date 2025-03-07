@@ -72,13 +72,10 @@ export async function getCharactersByHouseId(
   console.log(`Fetching Characters for house ID: ${houseId}`);
 
   try {
-    // Create a document reference for the house
-    const houseDocRef = doc(db, 'houses', houseId);
-
     // Query the houses collection where the houseId field matches the document reference
     const q = query(
       collection(db, 'characters'),
-      where('houseId', '==', houseDocRef)
+      where('houseId', '==', houseId)
     );
     const querySnapshot = await getDocs(q);
 
@@ -92,13 +89,13 @@ export async function getCharactersByHouseId(
     querySnapshot.forEach((doc) => {
       const docData = doc.data();
       const character = {
-        id: doc.id,
         ...docData,
       } as Character;
+      character.id = doc.id;
 
       characterArr.push(character);
     });
-
+    console.log('character arr', characterArr);
     return characterArr;
   } catch (error) {
     console.error('Error fetching characters:', error);
