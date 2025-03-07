@@ -20,9 +20,10 @@ function App() {
     const urlParams = new URLSearchParams(location.search);
     const code = urlParams.get("code");
 
-    if (code) {
+    // Only redirect when on "/" and code exists
+    if (code && location.pathname === "/") {
       console.log("Redirecting to /auth/discord/callback with code:", code);
-      navigate(`/auth/discord/callback?code=${code}`, { replace: true }); // Redirect properly if from discord
+      navigate(`/auth/discord/callback?code=${code}`, { replace: true }); // ✅ Prevents infinite loop
     }
   }, [location, navigate]);
 
