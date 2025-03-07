@@ -23,21 +23,13 @@ const StatGeneration = ({ generatedStats, countyId, onStatsGenerated }: StatGene
   });
 
   useEffect(() => {
-    if (generatedStats && stats) {
-      console.log("generated stats in statGeneration component", generatedStats)
-      if (JSON.stringify(statValues) !== JSON.stringify(generatedStats)) {
-        setStatValues({ ...generatedStats });
-      }
-    }
+    setStatValues({ ...generatedStats });
   }, [generatedStats, stats]);
-
-
 
   // Find associated stat when countyId changes
   useEffect(() => {
     const county = counties.find(c => c.id === countyId);
     setAssociatedStat(county ? county.associatedStatId : null);
-    // setStatValues({}); // Reset stats when county changes
   }, [countyId, counties]);
 
   // Check if all stats are filled
@@ -58,8 +50,6 @@ const StatGeneration = ({ generatedStats, countyId, onStatsGenerated }: StatGene
         <Box sx={{ display: 'inline-flex', flexDirection: 'column', width: '13rem', gap: '0.25rem' }}>
           {sortedStats.map((stat) => {
             const isAssociatedStat = stat.id === associatedStat;
-            console.log("stat values", statValues)
-            console.log("generated stats", generatedStats)
             return (
               <Box key={stat.id} sx={{ display: 'inline-flex', width: '100%' }}>
                 <Grid container spacing={2} columns={24}>

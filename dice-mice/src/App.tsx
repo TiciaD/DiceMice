@@ -12,25 +12,27 @@ import { useUser } from './context/UserDataProvider';
 import { JSX, useEffect } from 'react';
 import House from './features/house/House';
 import Logout from './pages/Logout';
+import { CircularProgress } from '@mui/material';
 
 function App() {
+
+  // Discord Auth will get sent to the home page by default
   const location = useLocation();
   const navigate = useNavigate();
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const code = urlParams.get("code");
 
-    // Only redirect when on "/" and code exists
+    // Only redirect to /auth/discord/callback when on "/" and code exists
     if (code && location.pathname === "/") {
-      console.log("Redirecting to /auth/discord/callback with code:", code);
-      navigate(`/auth/discord/callback?code=${code}`, { replace: true }); // ✅ Prevents infinite loop
+      navigate(`/auth/discord/callback?code=${code}`, { replace: true });
     }
   }, [location, navigate]);
 
   const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
     const { user, loading } = useUser();
 
-    if (loading) return <p>Loading...</p>; // Show loading state
+    if (loading) return <CircularProgress />;
     return user ? children : <Navigate to="/" />;
   };
 

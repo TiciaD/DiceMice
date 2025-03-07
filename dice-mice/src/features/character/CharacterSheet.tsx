@@ -1,6 +1,6 @@
 import { useGameData } from "@/context/GameDataContext";
 import { Character, CharacterSkills } from "@/models/character.model";
-import { Alert, Box, CircularProgress, FormControl, FormHelperText, InputLabel, MenuItem, Select } from "@mui/material";
+import { Alert, Box, CircularProgress, FormControl, FormHelperText, InputLabel, MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import Grid from '@mui/material/Grid2';
 import { useEffect, useState } from "react";
 import StatGeneration from "../character-create/StatGeneration";
@@ -45,6 +45,13 @@ const CharacterSheet = ({ character }: CharacterSheetProps) => {
 
   const isAllStatsFilled = Object.keys(generatedStats).every(stat => generatedStats[stat] > 0)
 
+  const handleCountyChange = (e: SelectChangeEvent<string>) => {
+    setSelectedCounty(e.target.value)
+    // Reset stats when county changes
+    setGeneratedStats({})
+  }
+
+
 
   return (
     <Box>
@@ -57,7 +64,7 @@ const CharacterSheet = ({ character }: CharacterSheetProps) => {
           name="countyId"
           label="County"
           value={selectedCounty}
-          onChange={(e) => setSelectedCounty(e.target.value)}
+          onChange={handleCountyChange}
         >
           {isLoading ? (
             <MenuItem disabled>Loading...</MenuItem>

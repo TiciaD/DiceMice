@@ -169,7 +169,7 @@ const CharacterCreate = () => {
           classId={selectedClass}
           characterLevel={1}
           characterStats={generatedStats}
-          selectedSkills={selectedSkills} // Placeholder, should come from character state
+          selectedSkills={selectedSkills}
           setSelectedSkills={setSelectedSkills}
         />
       </Box>}

@@ -1,4 +1,4 @@
-import { MouseEvent, useEffect, useState } from "react";
+import { MouseEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AppBar, Toolbar, Typography, Button, Box, IconButton, Menu, MenuItem, Avatar, Tooltip } from "@mui/material";
 import { useUser } from "@/context/UserDataProvider";
@@ -10,12 +10,6 @@ const Navbar = () => {
   const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
   // const [anchorElRulesNav, setAnchorElRulesNav] = useState<null | HTMLElement>(null);
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
-
-  useEffect(() => {
-    console.log("current env", import.meta.env.VITE_DISCORD_REDIRECT_URI)
-
-  }, [])
-
 
   const navLinks = NavigationLinks
 
