@@ -87,11 +87,11 @@ const Navbar = () => {
             sx={{ display: { xs: 'block', md: 'none' } }}
           >
             {navLinks.map((navLink) => (
-              <MenuItem key={navLink.path} onClick={handleCloseNavMenu}>
-                <Link to={navLink.path}>
+              <Link key={navLink.path} to={navLink.path}>
+                <MenuItem onClick={handleCloseNavMenu}>
                   <Typography sx={{ textAlign: 'center' }}>{navLink.label}</Typography>
-                </Link>
-              </MenuItem>
+                </MenuItem>
+              </Link>
             ))}
           </Menu>
         </Box>
@@ -166,11 +166,11 @@ const Navbar = () => {
             onClose={handleCloseUserMenu}
           >
             {UserMenuNavigationLinks.map((userMenuLink) => (
-              <MenuItem key={userMenuLink.path} onClick={handleCloseUserMenu}>
-                <Link to={userMenuLink.path}>
+              <Link key={userMenuLink.path} to={userMenuLink.path}>
+                <MenuItem onClick={handleCloseUserMenu}>
                   <Typography sx={{ textAlign: 'center' }}>{userMenuLink.label}</Typography>
-                </Link>
-              </MenuItem>
+                </MenuItem>
+              </Link>
             ))}
           </Menu>
         </Box>

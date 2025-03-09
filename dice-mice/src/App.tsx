@@ -39,7 +39,7 @@ function App() {
   return (
     <>
       <Navbar />
-      <div style={{ overflow: 'auto' }}>
+      <div style={{ overflow: 'auto', height: 'calc(100vh - 68.5px)' }}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/auth/discord/callback" element={<AuthCallback />} />

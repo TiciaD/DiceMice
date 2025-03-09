@@ -49,7 +49,7 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
     console.log("login called!")
     setLoading(true);
     try {
-      const response = await fetch(`https://dice-mice-api.vercel.app/api/auth?code=${code}`);
+      const response = await fetch(`${import.meta.env.VITE_DICE_MICE_API_URL}api/auth?code=${code}`);
       const data = await response.json();
 
       if (!data.firebaseToken) throw new Error("Failed to authenticate with Firebase.");

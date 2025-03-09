@@ -16,11 +16,7 @@ const StatGeneration = ({ generatedStats, countyId, onStatsGenerated }: StatGene
   const [statValues, setStatValues] = useState<Record<string, number>>({});
   const [associatedStat, setAssociatedStat] = useState<string | null>(null);
 
-  // Sort the stats based on the defined order
-  const statOrder = ["STR", "CON", "DEX", "INT", "WIS", "CHA"];
-  const sortedStats = [...stats].sort((a, b) => {
-    return statOrder.indexOf(a.abbreviation) - statOrder.indexOf(b.abbreviation);
-  });
+  const sortedStats = stats.sort((a, b) => a.order - b.order)
 
   useEffect(() => {
     setStatValues({ ...generatedStats });
