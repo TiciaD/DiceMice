@@ -2,7 +2,7 @@ import { createContext, ReactNode, useContext, useEffect, useState } from "react
 import { User } from "@/models/user.model";
 import { onAuthStateChanged, User as FirebaseUser, signInWithCustomToken, signOut } from "firebase/auth";
 import { auth, db } from "@/utils/firebase";
-import { doc, DocumentData, getDoc } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import { PlayerHouse } from "@/models/player-house.model";
 
 interface UserContextType {
