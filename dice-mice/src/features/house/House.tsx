@@ -11,7 +11,7 @@ import Characters from '../character/Characters'
 
 const House = () => {
   const { counties, loading } = useGameData();
-  const { user, userRef, house, setHouse } = useUser();
+  const { user, house, setHouse } = useUser();
 
   const [isDataLoading, setIsDataLoading] = useState(false);
   const [currentHouse, setCurrentHouse] = useState<PlayerHouse | null>(house)
@@ -29,10 +29,10 @@ const House = () => {
   });
 
   useEffect(() => {
-    if (!house) {
+    if (!house && !loading) {
       fetchHouse();
     }
-  }, [house, user]);
+  }, [house, user, loading]);
 
   const fetchHouse = async () => {
     setIsDataLoading(true);
@@ -87,7 +87,7 @@ const House = () => {
       setSubmitting(true);
       console.log("user", user)
 
-      if (user && userRef) {
+      if (user) {
         // Get reference to the current player
         const playerRef = doc(db, 'players', user.id);
 

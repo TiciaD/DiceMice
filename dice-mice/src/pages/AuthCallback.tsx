@@ -1,37 +1,24 @@
 import { useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useUser } from "@/context/UserDataProvider";
+import { useNavigate } from "react-router-dom";
+import useLogin from "@/hooks/useLogin";
 
 const AuthCallback = () => {
-  const { login } = useUser();
   const navigate = useNavigate();
-  const location = useLocation();
+  const urlParams = new URLSearchParams(location.search);
+  const code = urlParams.get("code");
+  const { hasLoggedIn } = useLogin(code ?? '');
 
   useEffect(() => {
-    const handleDiscordAuth = async () => {
-      const urlParams = new URLSearchParams(location.search);
-      const code = urlParams.get("code");
+    if (hasLoggedIn) {
+      navigate("/dashboard");
+    }
+  }, [hasLoggedIn, navigate]);
 
-      if (!code) {
-        console.error("No authorization code found.");
-        navigate("/"); // Redirect to home if no code is found
-        return;
-      }
-
-      try {
-        // Exchange the Discord code for a Firebase token
-        login(code)
-
-        // Redirect to home page or dashboard
-        navigate("/");
-      } catch (error) {
-        console.error("Error during authentication:", error);
-        navigate("/"); // Redirect to home if error occurs
-      }
-    };
-
-    handleDiscordAuth();
-  }, [location, navigate]);
+  if (!code) {
+    console.error("No authorization code found.");
+    navigate("/"); // Redirect to home if no code is found
+    return <div>Error: No code</div>;
+  }
 
   return <div>Authenticating...</div>; // Show loading message
 };

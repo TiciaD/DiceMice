@@ -13,6 +13,7 @@ import { JSX, useEffect } from 'react';
 import House from './features/house/House';
 import Logout from './pages/Logout';
 import { CircularProgress } from '@mui/material';
+import Dashboard from './pages/Dashboard';
 
 function App() {
 
@@ -30,9 +31,9 @@ function App() {
   }, [location, navigate]);
 
   const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
-    const { user, loading } = useUser();
+    const { user, loading, loadingLoggedInUser } = useUser();
 
-    if (loading) return <CircularProgress />;
+    if (loading || loadingLoggedInUser) return <CircularProgress />;
     return user ? children : <Navigate to="/" />;
   };
 
@@ -43,6 +44,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/auth/discord/callback" element={<AuthCallback />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/logout" element={<Logout />} />
           <Route path="/house" element={<ProtectedRoute><House /></ProtectedRoute>} />
           <Route path="/classes" element={<ProtectedRoute><ClassesView /></ProtectedRoute>} />

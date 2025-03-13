@@ -7,10 +7,10 @@ import { PlayerHouse } from "@/models/player-house.model";
 
 interface UserContextType {
   user: User | null;
-  userRef: DocumentData | null;
   house: PlayerHouse | null;
   setHouse: (house: PlayerHouse) => void
   loading: boolean;
+  loadingLoggedInUser: boolean;
   login: (code: string) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -21,9 +21,9 @@ const UserDataContext = createContext<UserContextType | undefined>(undefined);
 // Provider component
 export const UserDataProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [userRef, setUserRef] = useState<DocumentData | null>(null)
   const [house, setHouse] = useState<PlayerHouse | null>(null)
-  const [loading, setLoading] = useState(true);
+  const [loadingLoggedInUser, setLoadingLoggedInUser] = useState(true);
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
@@ -32,14 +32,13 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
         try {
           const userDoc = await getDoc(doc(db, "players", firebaseUser.uid));
           if (userDoc.exists()) {
-            setUserRef(userDoc)
             setUser(userDoc.data() as User);
           }
         } catch (error) {
           console.error("Could not fetch existing user", error)
         }
       }
-      setLoading(false);
+      setLoadingLoggedInUser(false);
     });
 
     return () => unsubscribe();
@@ -60,7 +59,6 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
       // Fetch user data from Firestore
       const userDoc = await getDoc(doc(db, "players", auth.currentUser?.uid!));
       if (userDoc.exists()) {
-        setUserRef(userDoc)
         setUser(userDoc.data() as User);
       }
     } catch (error) {
@@ -75,7 +73,7 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <UserDataContext.Provider value={{ user, userRef, loading, login, logout, house, setHouse }}>
+    <UserDataContext.Provider value={{ user, loading, loadingLoggedInUser, login, logout, house, setHouse }}>
       {children}
     </UserDataContext.Provider>
   );
