@@ -35,12 +35,12 @@ const HouseOverviewCard = ({ house, showBio = true, setOpenDialog }: HouseOvervi
               Origin County: {getCountyName()}
             </Typography>
             <Typography variant="subtitle1" component="div" sx={{ color: 'text.secondary', mb: 1.5 }}>
-              {/* {house.motto} */}
-              Actions Bring Results
+              {house.motto}
+              {/* Actions Bring Results */}
             </Typography>
             {showBio && <Typography variant="body1">
-              {/* {house.bio} */}
-              This house if more of a neighborhood with many different personalities that all have love/hate for each other
+              {house.bio}
+              {/* This house if more of a neighborhood with many different personalities that all have love/hate for each other */}
             </Typography>}
           </CardContent>
           <CardActions>
