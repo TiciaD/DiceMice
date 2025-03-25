@@ -7,7 +7,6 @@ import { addDoc, collection, doc } from 'firebase/firestore'
 import { db } from '@/utils/firebase'
 import { useUser } from '@/context/UserDataProvider'
 import { getHouseByPlayerId } from '@/services/firestore-service'
-import Characters from '../character/Characters'
 
 const House = () => {
   const { counties, loading } = useGameData();
@@ -128,13 +127,9 @@ const House = () => {
     <Box sx={{ m: 2 }}>
       {(loading || isDataLoading) && <CircularProgress />}
       {currentHouse != null ?
-        <Box>
+        <Box sx={{ maxWidth: '50rem', mx: 'auto' }}>
           <Typography variant="h5" gutterBottom>House {currentHouse.name}</Typography>
           <HouseInfo house={currentHouse} setHouse={setCurrentHouse} />
-          <Box sx={{ pt: 3 }}>
-            <Typography variant="h5">{currentHouse.name} Mice</Typography>
-            <Characters house={currentHouse} />
-          </Box>
         </Box> :
         <Box>
           <Typography variant="subtitle1" gutterBottom>No House Found.</Typography>

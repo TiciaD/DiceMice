@@ -14,6 +14,9 @@ import House from './features/house/House';
 import Logout from './pages/Logout';
 import { CircularProgress } from '@mui/material';
 import Dashboard from './pages/Dashboard';
+import Characters from './features/character/Characters';
+import { CharacterCreateProvider } from './context/CharacterSheetContext';
+import CreateCharacter from './features/character/CreateCharacter';
 
 function App() {
 
@@ -47,11 +50,12 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/logout" element={<Logout />} />
           <Route path="/house" element={<ProtectedRoute><House /></ProtectedRoute>} />
+          <Route path="/characters" element={<ProtectedRoute><Characters /></ProtectedRoute>} />
           <Route path="/classes" element={<ProtectedRoute><ClassesView /></ProtectedRoute>} />
           <Route path="/skills" element={<ProtectedRoute><SkillsView /></ProtectedRoute>} />
           <Route path="/counties" element={<ProtectedRoute><CountiesView /></ProtectedRoute>} />
           <Route path="/characters/:characterId" element={<ProtectedRoute><CharacterView /></ProtectedRoute>} />
-          <Route path="/characters/create" element={<ProtectedRoute><CharacterCreate /></ProtectedRoute>} />
+          <Route path="/characters/create" element={<ProtectedRoute><CharacterCreateProvider><CreateCharacter /></CharacterCreateProvider></ProtectedRoute>} />
         </Routes>
       </div>
     </>

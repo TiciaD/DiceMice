@@ -1,5 +1,6 @@
 import { useUser } from "@/context/UserDataProvider";
-import { Box, CircularProgress, Container, IconButton, Tooltip, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Container, IconButton, Tooltip, Typography } from "@mui/material";
+import { Link } from "react-router-dom";
 
 const Home = () => {
   const { user, loading } = useUser()
@@ -10,6 +11,9 @@ const Home = () => {
         <Typography variant="h4" gutterBottom>
           Welcome to Dice Mice {user ? ` ${user.username}` : ''}!
         </Typography>
+        <Link to='/dashboard'>
+          <Button variant="contained">View Player Dashboard</Button>
+        </Link>
 
         {!user &&
           <Box>

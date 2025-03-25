@@ -8,13 +8,32 @@ export interface Character {
   classId: string;
   houseId: string;
   countyId: string;
-  current_base_stats: Record<string, number>;
-  original_base_stats: Record<string, number>;
-  hp_progression: Record<number, number>; // {1, 2} i.e. Level 1, 2 HP
+  current_base_stats: BaseStatMap;
+  original_base_stats: BaseStatMap;
+  hp_progression: HPProgressionMap; // {1, 2} i.e. Level 1, 2 HP
   skills: CharacterSkills[];
+  chosenClassSkills?: string[];
 }
 
 export interface CharacterSkills {
   skillId: string;
   skillLevelId: string;
 }
+
+export type AllowedStats =
+  | 'strength'
+  | 'constitution'
+  | 'dexterity'
+  | 'intelligence'
+  | 'wisdom'
+  | 'charisma';
+
+export type AllowedLevels = '1' | '2' | '3' | '4' | '5' | '6' | '7';
+
+export type BaseStatMap = {
+  [key in AllowedStats]: number;
+};
+
+export type HPProgressionMap = {
+  [key in AllowedLevels]: number;
+};

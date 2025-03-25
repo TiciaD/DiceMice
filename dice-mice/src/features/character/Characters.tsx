@@ -1,36 +1,62 @@
 import { useGameData } from "@/context/GameDataContext";
+import { useUser } from "@/context/UserDataProvider";
 import { Character } from "@/models/character.model";
-import { PlayerHouse } from "@/models/player-house.model";
-import { getCharactersByHouseId } from "@/services/firestore-service";
+import { getCharactersByHouseId, getHouseByPlayerId } from "@/services/firestore-service";
 import { Box, Button, Card, CardActions, CardContent, CircularProgress, Container, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-interface CharactersProps {
-  house: PlayerHouse | null;
-}
-
-const Characters = ({ house }: CharactersProps) => {
+const Characters = () => {
+  const { user, house, setHouse, loading } = useUser()
   const { classes, counties } = useGameData();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [characters, setCharacters] = useState<Character[]>([])
 
   useEffect(() => {
-    if (house) {
-      setLoading(true)
-      const fetchCharacters = async () => {
-        const characterData = await getCharactersByHouseId(house.id);
-        if (characterData && characterData.length > 0) {
-          setCharacters(characterData)
-        }
-        console.log("character data", characterData)
-        setLoading(false);
-      };
-
-      fetchCharacters();
+    if (!house) {
+      fetchData();
+    } else {
+      fetchCharacters()
     }
-  }, []);
+  }, [house, user]);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      if (user) {
+        const foundHouse = await getHouseByPlayerId(user.id)
+
+        if (foundHouse) {
+          const foundCharacters = await getCharactersByHouseId(foundHouse.id)
+          setHouse(foundHouse);
+
+          if (foundCharacters) {
+            setCharacters(foundCharacters)
+          }
+        }
+      }
+      setIsLoading(false)
+    } catch (error) {
+      console.error("Error fetching Data:", error);
+    }
+  };
+
+  const fetchCharacters = async () => {
+    setIsLoading(true);
+    try {
+      if (user && house) {
+        const foundCharacters = await getCharactersByHouseId(house.id)
+
+        if (foundCharacters) {
+          setCharacters(foundCharacters)
+        }
+      }
+      setIsLoading(false)
+    } catch (error) {
+      console.error("Error fetching Data:", error);
+    }
+  }
 
   const handleCharacterSelect = (characterId: string) => {
     navigate(`/characters/${characterId}`);
@@ -55,9 +81,9 @@ const Characters = ({ house }: CharactersProps) => {
     if (house == null) {
       content = <p>No house was found. Please create a house to create characters</p>;
     } else if (characters.length == 0) {
-      content = <Container><span>No characters found for this house. Would you like to Create a Character?</span><Button size="small">Create a Character</Button></Container>;
+      content = <Container><Typography variant="subtitle1">No characters found for this house. Would you like to Create a Character?</Typography><Button size="small">Create a Character</Button></Container>;
     } else {
-      content = <Box sx={{ minWidth: 275 }}>
+      content = <Box sx={{ minWidth: 275, maxWidth: '25rem', mx: 'auto' }}>
         <Button size="large" onClick={handleCharacterCreateClick}>Create a Character</Button>
         {characters.map((character) => {
           return (<Card key={character.id} variant="outlined">
@@ -88,7 +114,7 @@ const Characters = ({ house }: CharactersProps) => {
 
   return (
     <Box sx={{ mt: 2, mb: 2 }}>
-      {loading ? <CircularProgress /> : render()}
+      {loading || isLoading ? <CircularProgress /> : render()}
     </Box>
   )
 }

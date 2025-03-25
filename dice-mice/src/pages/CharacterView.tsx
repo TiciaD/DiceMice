@@ -1,11 +1,7 @@
 import { useUser } from "@/context/UserDataProvider";
-import CharacterSheet from "@/features/character/CharacterSheet";
-import { Character } from "@/models/character.model";
 import { PlayerHouse } from "@/models/player-house.model";
 import { getHouseByPlayerId } from "@/services/firestore-service";
-import { db } from "@/utils/firebase";
 import { Box, Button, CircularProgress, Container, Typography } from "@mui/material";
-import { doc, getDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -18,15 +14,15 @@ const CharacterView = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [currentHouse, setCurrentHouse] = useState<PlayerHouse | null>(null)
-  const [currentCharacter, setCurrentCharacter] = useState<Character | null>(null)
+  // const [currentCharacter, setCurrentCharacter] = useState<Character | null>(null)
 
   useEffect(() => {
     setIsLoading(true)
     console.log("current house", currentHouse)
 
-    if (characterId) {
-      fetchCharacter()
-    }
+    // if (characterId) {
+    //   fetchCharacter()
+    // }
 
     if (!house) {
       fetchHouse();
@@ -45,23 +41,23 @@ const CharacterView = () => {
     setIsLoading(false)
   };
 
-  const fetchCharacter = async () => {
-    if (user && characterId) {
-      const characterDoc = await getDoc(doc(db, "characters", characterId));
-      const character = { ...characterDoc.data() } as Character
-      character.id = characterDoc.id;
-      console.log("character", character)
-      setCurrentCharacter(character);
-    }
-    setIsLoading(false)
-  };
+  // const fetchCharacter = async () => {
+  //   if (user && characterId) {
+  //     const characterDoc = await getDoc(doc(db, "characters", characterId));
+  //     const character = { ...characterDoc.data() } as Character
+  //     character.id = characterDoc.id;
+  //     console.log("character", character)
+  //     setCurrentCharacter(character);
+  //   }
+  //   setIsLoading(false)
+  // };
 
   return (
     <Container>
       {characterId && !loading ?
         <Box>
           <Typography variant="h4">Character ID: {characterId}</Typography>
-          <CharacterSheet character={currentCharacter} />
+          {/* <CharacterSheet character={currentCharacter} /> */}
         </Box>
         :
         <Typography variant="h4">No character found</Typography>

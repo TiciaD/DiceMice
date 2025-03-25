@@ -5,8 +5,8 @@ export interface NavLinks {
 
 export const NavigationLinks: NavLinks[] = [
   {
-    label: 'Create Mouse',
-    path: '/characters/create',
+    label: 'Dashboard',
+    path: '/dashboard',
   },
   {
     label: 'Classes',
@@ -58,8 +58,8 @@ export const UserMenuNavigationLinks: NavLinks[] = [
     path: '/house',
   },
   {
-    label: 'Preferences',
-    path: '/preferences',
+    label: 'My Characters',
+    path: '/characters',
   },
   {
     label: 'Logout',

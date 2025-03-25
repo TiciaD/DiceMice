@@ -1,12 +1,11 @@
+import { BaseStatMap } from '@/models/character.model';
 import { Class } from '@/models/class.model';
 
-export const calculateBaseWillpower = (
-  stats: Record<string, number>
-): number => {
+export const calculateBaseWillpower = (stats: BaseStatMap): number => {
   return Math.max(
-    calculateModifier(stats['intelligence']),
-    calculateModifier(stats['wisdom']),
-    calculateModifier(stats['charisma'])
+    calculateModifier(stats.intelligence),
+    calculateModifier(stats.wisdom),
+    calculateModifier(stats.charisma)
   );
 };
 
@@ -23,7 +22,7 @@ export const calculateWillpower = (
 
   if (classData) {
     if (classData.willpower_advancement === 'each_level') {
-      return baseWillpower + Math.max(0, level - 1); // +1 per level beyond level 1
+      return baseWillpower + Math.max(0, level); // +1 per level beyond level 1
     }
     if (classData.willpower_advancement === 'even_levels') {
       return baseWillpower + Math.floor(level / 2); // +1 every even level
