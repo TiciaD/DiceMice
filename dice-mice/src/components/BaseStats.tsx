@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect } from "react";
+import { ChangeEvent } from "react";
 import { useCharacterCreateContext } from "@/context/CharacterSheetContext";
 import { useGameData } from "@/context/GameDataContext";
 import { Box, Button, FormControl, FormHelperText, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, Typography } from "@mui/material";

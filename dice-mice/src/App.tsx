@@ -3,7 +3,6 @@ import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-
 import Navbar from './components/Navbar';
 import CharacterView from './pages/CharacterView';
 import Home from './pages/Home';
-import CharacterCreate from './pages/CharacterCreate';
 import CountiesView from './pages/CountiesView';
 import SkillsView from './pages/SkillsView';
 import ClassesView from './pages/ClassesView';
