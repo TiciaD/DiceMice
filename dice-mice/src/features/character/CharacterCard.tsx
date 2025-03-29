@@ -32,7 +32,7 @@ const CharacterCard = ({ character }: CharacterCardProps) => {
         </Typography>
       </CardContent>
       <CardActions>
-        <Link to={`characters/${character.id}`}>
+        <Link to={`/characters/${character.id}`}>
           <Button size="small">More Details</Button>
         </Link>
       </CardActions>

@@ -16,6 +16,7 @@ import Dashboard from './pages/Dashboard';
 import Characters from './features/character/Characters';
 import { CharacterCreateProvider } from './context/CharacterSheetContext';
 import CreateCharacter from './features/character/CreateCharacter';
+import { CharacterEditProvider } from './context/CharacterEditContext';
 
 function App() {
 
@@ -53,7 +54,7 @@ function App() {
           <Route path="/classes" element={<ProtectedRoute><ClassesView /></ProtectedRoute>} />
           <Route path="/skills" element={<ProtectedRoute><SkillsView /></ProtectedRoute>} />
           <Route path="/counties" element={<ProtectedRoute><CountiesView /></ProtectedRoute>} />
-          <Route path="/characters/:characterId" element={<ProtectedRoute><CharacterView /></ProtectedRoute>} />
+          <Route path="/characters/:characterId" element={<ProtectedRoute><CharacterEditProvider><CharacterView /></CharacterEditProvider></ProtectedRoute>} />
           <Route path="/characters/create" element={<ProtectedRoute><CharacterCreateProvider><CreateCharacter /></CharacterCreateProvider></ProtectedRoute>} />
         </Routes>
       </div>

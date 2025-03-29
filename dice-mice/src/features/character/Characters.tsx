@@ -83,8 +83,9 @@ const Characters = () => {
     } else if (characters.length == 0) {
       content = <Container><Typography variant="subtitle1">No characters found for this house. Would you like to Create a Character?</Typography><Button size="small">Create a Character</Button></Container>;
     } else {
-      content = <Box sx={{ minWidth: 275, maxWidth: '25rem', mx: 'auto' }}>
+      content = <Box sx={{ display: 'inline-flex', flexDirection: 'column', gap: 1, minWidth: 275, maxWidth: '25rem', mx: 'auto' }}>
         <Button size="large" onClick={handleCharacterCreateClick}>Create a Character</Button>
+
         {characters.map((character) => {
           return (<Card key={character.id} variant="outlined">
             <CardContent>
@@ -113,7 +114,7 @@ const Characters = () => {
   }
 
   return (
-    <Box sx={{ mt: 2, mb: 2 }}>
+    <Box sx={{ mt: 2, mb: 2, width: '100%' }}>
       {loading || isLoading ? <CircularProgress /> : render()}
     </Box>
   )

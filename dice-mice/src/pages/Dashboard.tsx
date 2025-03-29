@@ -79,9 +79,11 @@ const Dashboard = () => {
                   <Button variant="contained">Create a New Mouse</Button>
                 </Link>
               </Box>
-              {characters.length > 0 && characters.map((character) => {
-                return <CharacterCard key={character.id} character={character} />
-              })}
+              <Box sx={{ display: 'inline-flex', flexDirection: 'column', gap: 1, width: '100%' }}>
+                {characters.length > 0 && characters.map((character) => {
+                  return <CharacterCard key={character.id} character={character} />
+                })}
+              </Box>
             </Grid>
           </Grid>
 

@@ -95,7 +95,7 @@ const DefensiveStatTable = () => {
                     <TableCell component="th" scope="row">
                       {stat.name}
                     </TableCell>
-                    <TableCell align="right">{getDerivedStatValue(stat)}</TableCell>
+                    <TableCell align="right">{selectedClass == 'retainer' ? 0 : getDerivedStatValue(stat)}</TableCell>
                   </TableRow>
                 )
               }
@@ -103,12 +103,14 @@ const DefensiveStatTable = () => {
               <TableRow>
                 <TableCell>Willpower</TableCell>
                 <TableCell align="right">{
-                  calculateWillpower(
-                    calculateBaseWillpower(generatedStats),
-                    selectedClass,
-                    level,
-                    classes
-                  )
+                  selectedClass == 'retainer'
+                    ? 0
+                    : calculateWillpower(
+                      calculateBaseWillpower(generatedStats),
+                      selectedClass,
+                      level,
+                      classes
+                    )
                 }</TableCell>
               </TableRow>
             </TableBody>

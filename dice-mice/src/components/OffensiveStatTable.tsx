@@ -71,14 +71,14 @@ const OffensiveStatTable = () => {
                     <TableCell component="th" scope="row">
                       {stat.name}
                     </TableCell>
-                    <TableCell align="right">{getNonCalculatedStatValue(stat)}</TableCell>
+                    <TableCell align="right">{selectedClass == 'retainer' ? 0 : getNonCalculatedStatValue(stat)}</TableCell>
                   </TableRow>
                 )
               }
               )}
               <TableRow>
                 <TableCell>Initiative</TableCell>
-                <TableCell align="right">{getInitiative()}</TableCell>
+                <TableCell align="right">{selectedClass == 'retainer' ? 0 : getInitiative()}</TableCell>
               </TableRow>
             </TableBody>
           </Table>

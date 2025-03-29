@@ -1,12 +1,13 @@
 import { useCharacterCreateContext } from '@/context/CharacterSheetContext';
 import { useGameData } from '@/context/GameDataContext';
-import { calculateModifier } from '@/utils/stat-calculations';
+import { calculateModifier, calculateRetainerModifier } from '@/utils/stat-calculations';
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material'
 
 const StatModTable = () => {
   const { stats } = useGameData();
   const {
     generatedStats,
+    selectedClass
   } = useCharacterCreateContext();
 
   const getStatAbbrieviation = (statId: string) => {
@@ -31,7 +32,9 @@ const StatModTable = () => {
               <TableCell component="th" scope="row">
                 {getStatAbbrieviation(key)}
               </TableCell>
-              <TableCell align="right">{calculateModifier(value)}</TableCell>
+              <TableCell align="right">
+                {selectedClass == 'retainer' ? calculateRetainerModifier(value) : calculateModifier(value)}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

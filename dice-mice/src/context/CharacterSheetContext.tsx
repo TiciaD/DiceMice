@@ -71,7 +71,14 @@ export const CharacterCreateProvider = ({ children }: { children: ReactNode }) =
     4: 0,
     5: 0,
     6: 0,
-    7: 0
+    7: 0,
+    8: 0,
+    9: 0,
+    10: 0,
+    11: 0,
+    12: 0,
+    13: 0,
+    14: 0
   });
   const [chosenClassSkills, setChosenClassSkills] = useState<string[]>([]);
 
@@ -138,13 +145,44 @@ export const CharacterCreateProvider = ({ children }: { children: ReactNode }) =
     try {
       const docRef = await addDoc(collection(db, "characters"), newCharacter);
       console.log("Character created with ID: ", docRef.id);
-      alert("Character successfully created!");
-      console.log("new character", newCharacter)
     } catch (error) {
       console.error("Error creating character: ", error);
       alert("Failed to create character.");
     } finally {
       setIsLoading(false);
+      // Reset all fields
+      setGeneratedStats({
+        strength: 0,
+        constitution: 0,
+        dexterity: 0,
+        intelligence: 0,
+        wisdom: 0,
+        charisma: 0
+      })
+      setSelectedClass('')
+      setSelectedCounty('')
+      setEligibleClasses([])
+      setLevel(1)
+      setName('')
+      setSelectedSkills([])
+      setAssociatedStat('')
+      setChosenClassSkills([])
+      setHPProgression({
+        1: 0,
+        2: 0,
+        3: 0,
+        4: 0,
+        5: 0,
+        6: 0,
+        7: 0,
+        8: 0,
+        9: 0,
+        10: 0,
+        11: 0,
+        12: 0,
+        13: 0,
+        14: 0
+      })
     }
   }
 

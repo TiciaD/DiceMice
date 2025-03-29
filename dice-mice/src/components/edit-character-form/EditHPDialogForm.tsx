@@ -1,32 +1,31 @@
-import { useCharacterCreateContext } from '@/context/CharacterSheetContext';
-import { useGameData } from '@/context/GameDataContext';
-import { rollDie } from '@/utils/dice-rolls';
-import { calculateModifier } from '@/utils/stat-calculations';
-import { Box, Button, FormControl, TextField, Typography } from '@mui/material'
+import { ChangeEvent, useState } from 'react';
+import { Box, Button, DialogActions, FormControl, TextField, Typography } from '@mui/material'
 import Grid from '@mui/material/Grid2';
-import { ChangeEvent } from 'react';
+import { Character, HPProgressionMap } from '@/models/character.model';
+import { Class } from '@/models/class.model';
+import { calculateModifier } from '@/utils/stat-calculations';
+import { rollDie } from '@/utils/dice-rolls';
+import { updateCharacterField } from '@/services/firestore-service';
 
-const HitPointProgression = () => {
-  const { classes, loading } = useGameData();
-  const {
-    generatedStats,
-    selectedClass,
-    selectedCounty,
-    level,
-    hpProgression,
-    setHPProgression,
-  } = useCharacterCreateContext();
+interface EditHPDialogFormProps {
+  character: Character
+  classes: Class[]
+  handleClose: () => void
+}
+
+const EditHPDialogForm = ({ character, classes, handleClose }: EditHPDialogFormProps) => {
+  const [hpProgression, setHPProgression] = useState<HPProgressionMap>({
+    ...character.hp_progression
+  });
 
   const getHitDie = () => {
-    const classData = classes.find((c) => c.id == selectedClass)
+    const classData = classes.find((c) => c.id == character.classId)
     return classData?.hit_die || "__"; // Default to blank if class is not selected
   };
 
   const handleRollHP = () => {
-    if (!selectedClass) return;
-
     const hitDie = getHitDie();
-    const conMod = calculateModifier(generatedStats["constitution"]);
+    const conMod = calculateModifier(character.current_base_stats["constitution"]);
     const isConModGreaterThanHitDieMax = conMod >= Number(hitDie.replace('1d', '')) // i.e. conMod = 5 and hitDie = 1d4
 
     let rolledValue;
@@ -55,11 +54,17 @@ const HitPointProgression = () => {
     setHPProgression(updatedHP);
   }
 
+  const handleSubmit = async () => {
+    console.log("submit hp progression", hpProgression)
+    console.log("defaultValue", character.hp_progression)
+    await updateCharacterField(character.id, 'hp_progression', hpProgression)
+    handleClose()
+  }
+
   return (
     <Box>
-      <Typography variant='h5'>Set Hit Points by Level</Typography>
-      <Typography variant='subtitle1'>Hit Die: {selectedClass == 'retainer' ? 'N/A' : getHitDie()}</Typography>
-      {selectedClass && <Box sx={{ width: '13rem', maxHeight: '400px', display: 'inline-flex', flexDirection: 'column', flexWrap: 'wrap' }}>
+      <Typography variant='h6' gutterBottom>Hit Die: <b>{character.classId == 'retainer' ? 'N/A' : getHitDie()}</b></Typography>
+      <Box sx={{ width: '13rem', maxHeight: '400px', display: 'inline-flex', flexDirection: 'column', flexWrap: 'wrap' }}>
         {Object.entries(hpProgression).map(([key, value]) => {
 
           return (
@@ -70,7 +75,7 @@ const HitPointProgression = () => {
                 </Typography>
               </Grid>
               <Grid size={6}>
-                <FormControl size="small" sx={{ width: '70px' }} disabled={loading || selectedClass == 'retainer' || level < Number(key)}>
+                <FormControl size="small" sx={{ width: '70px' }} disabled={character.classId == 'retainer' || character.level < Number(key)}>
                   <TextField
                     id="outlined-number"
                     type="number"
@@ -82,21 +87,27 @@ const HitPointProgression = () => {
                         min: 0,
                       }
                     }}
-                    disabled={!selectedCounty || loading || selectedClass == 'retainer' || level < Number(key)}
+                    disabled={character.classId == 'retainer' || character.level < Number(key)}
                     value={value}
                     onChange={(e) => handleInputStats(e, key)}
                   />
                 </FormControl>
               </Grid>
               <Grid size={6} sx={{ alignSelf: 'center' }}>
-                <Button variant="contained" disabled={!selectedClass || loading || selectedClass == 'retainer' || level < Number(key)} onClick={() => handleRollStat(key)}>Roll</Button>
+                <Button variant="contained" disabled={character.classId == 'retainer' || character.level < Number(key)} onClick={() => handleRollStat(key)}>Roll</Button>
               </Grid>
             </Grid>
           )
         })}
-      </Box>}
+      </Box>
+      <DialogActions>
+        <Button onClick={handleClose}>Cancel</Button>
+        <Button onClick={handleSubmit} variant="contained">
+          Save
+        </Button>
+      </DialogActions>
     </Box>
   )
 }
 
-export default HitPointProgression
+export default EditHPDialogForm

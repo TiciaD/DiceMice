@@ -8,6 +8,7 @@ import {
   getDoc,
   getDocs,
   query,
+  updateDoc,
   where,
 } from 'firebase/firestore';
 
@@ -117,5 +118,62 @@ export const fetchInitiativeChart = async () => {
   } catch (error) {
     console.error('Error fetching initiative chart:', error);
     return [];
+  }
+};
+
+export const fetchCharacterById = async (
+  characterId: string
+): Promise<Character | null> => {
+  try {
+    const characterDoc = await getDoc(doc(db, 'characters', characterId));
+    if (characterDoc.exists()) {
+      const character = { ...characterDoc.data() } as Character;
+      character.id = characterDoc.id;
+      console.log('character', character);
+      return character;
+    } else {
+      console.error('Character not found!');
+      return null;
+    }
+  } catch (error) {
+    console.error('Error fetching Character:', error);
+    return null;
+  }
+};
+
+export const updateCharacterField = async (
+  characterId: string,
+  field: string,
+  value: any
+): Promise<void> => {
+  try {
+    const characterRef = doc(db, 'characters', characterId);
+    await updateDoc(characterRef, {
+      [field]: value,
+    });
+    console.log(`Character ${characterId} updated: ${field} =`, value);
+  } catch (error) {
+    console.error('Error updating character field:', error);
+    throw error;
+  }
+};
+
+/**
+ * Updates multiple fields on a character document.
+ *
+ * @param characterId - The Firestore document ID of the character.
+ * @param updates - An object containing fields and their new values.
+ */
+export const batchUpdateCharacter = async (
+  characterId: string,
+  updates: Partial<Record<keyof Character, any>>
+): Promise<void> => {
+  try {
+    const characterRef = doc(db, 'characters', characterId);
+    await updateDoc(characterRef, updates);
+    console.log(`Character ${characterId} updated with`, updates);
+  } catch (error) {
+    console.error('Batch update failed:', error);
+    throw error;
   }
 };

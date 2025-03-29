@@ -26,25 +26,28 @@ const FinalizeCharacter = () => {
 
   const isErrors = () => {
     const isClassSelected = selectedClass;
-    const isHPSet = hpProgression[level.toString() as AllowedLevels] > 0
+    const isHPSet = selectedClass == 'retainer' || hpProgression[level.toString() as AllowedLevels] > 0
     const isCountySelected = selectedCounty
     const isStatsSet = Object.entries(generatedStats).every(([_stat, value]) => value >= 3) // No stat can be lower than 3
 
+    let errorsArr = []
     if (!isClassSelected) {
-      setErrors([...errors, 'Please Select A Class'])
+      errorsArr.push('Please Select A Class')
     }
 
     if (!isHPSet) {
-      setErrors([...errors, `Please Set HP for Level ${level}`])
+      errorsArr.push(`Please Set HP for Level ${level}`)
     }
 
     if (!isCountySelected) {
-      setErrors([...errors, 'Please Select A County'])
+      errorsArr.push('Please Select A County')
     }
 
     if (!isStatsSet) {
-      setErrors([...errors, 'All Base Stats must have a value >= 3'])
+      errorsArr.push('All Base Stats must have a value >= 3')
     }
+
+    setErrors([...errorsArr])
     console.log("error check", selectedClass, selectedCounty, isHPSet, isStatsSet)
     return !isClassSelected || !isHPSet || !isCountySelected || !isStatsSet
   }

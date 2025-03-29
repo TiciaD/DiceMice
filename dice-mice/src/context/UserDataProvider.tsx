@@ -28,7 +28,7 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
       if (firebaseUser) {
-        console.log("current firebase user", firebaseUser)
+        // console.log("current firebase user", firebaseUser)
         try {
           const userDoc = await getDoc(doc(db, "players", firebaseUser.uid));
           if (userDoc.exists()) {
@@ -45,7 +45,6 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = async (code: string) => {
-    console.log("login called!")
     setLoading(true);
     try {
       const response = await fetch(`${import.meta.env.VITE_DICE_MICE_API_URL}api/auth?code=${code}`);
